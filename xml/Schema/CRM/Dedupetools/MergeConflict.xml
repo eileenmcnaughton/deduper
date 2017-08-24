@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Dedupetools</base>
+  <class>MergeConflict</class>
+  <name>civicrm_mergeconflict</name>
+  <comment>Table for tracking and viewing merge conflicts.</comment>
+  <add>1.0</add>
+  <log>false</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique MergeConflict ID</comment>
+    <add>4.4</add>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>contact_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact</comment>
+    <add>4.4</add>
+  </field>
+
+</table>
