@@ -43,17 +43,16 @@ function civicrm_api3_merge_conflict_delete($params) {
  */
 function civicrm_api3_merge_conflict_get($params) {
 
-  CRM_Core_DAO::executeQuery('INSEET INTO civicrm_merge_conflict 
+  CRM_Core_DAO::executeQuery('
+  INSERT INTO civicrm_merge_conflict (contact_1, contact_2)
   SELECT DISTINCT
     entity_id1 as contact_1,
-    entity_id2 as contact_2,
-    0 as group_id, 
-    "" as conflicted_field,
-    "" as value1, 
-    "" as value2, 
-    "" as analysis
-    FROM civicrm_prevnext_cache
+    entity_id2 as contact_2
+    FROM civicrm_prevnext_cache pn
+    LEFT JOIN civicrm_merge_conflict mc
+    ON mc.contact_1 = pn.entity_id1 AND mc.contact_2 =pn.entity_id2
     WHERE cachekey LIKE "merge%conflicts"
+    AND mc.id IS NULL
   ');
 
   $result = CRM_Core_DAO::executeQuery('SELECT * FROM civicrm_merge_conflict WHERE conflicted_field = "" LIMIT 10000');
