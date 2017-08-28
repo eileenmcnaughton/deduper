@@ -42,21 +42,8 @@ function civicrm_api3_merge_conflict_delete($params) {
  * @throws API_Exception
  */
 function civicrm_api3_merge_conflict_get($params) {
-  /*CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS civicrm_merge_conflict");
 
-  CREATE TABLE `civicrm_merge_conflict` (
-  `contact_1` int(10) unsigned NOT NULL COMMENT 'FK to entity table specified in entity_table column.',
-  `contact_2` int(10) unsigned NOT NULL COMMENT 'FK to entity table specified in entity_table column.',
-  `group_id` int(10) NOT NULL DEFAULT '0',
-  `conflicted_field` varchar(255) NOT NULL DEFAULT '',
-  `value1` varchar(255) NOT NULL DEFAULT '',
-  `value2` varchar(255) NOT NULL DEFAULT '',
-  `analysis` varchar(255) NOT NULL DEFAULT '',
-  KEY `contact_1` (`contact_1`,`contact_2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-  CRM_Core_DAO::executeQuery('CREATE TABLE civicrm_merge_conflict 
+  CRM_Core_DAO::executeQuery('INSEET INTO civicrm_merge_conflict 
   SELECT DISTINCT
     entity_id1 as contact_1,
     entity_id2 as contact_2,
@@ -68,7 +55,7 @@ function civicrm_api3_merge_conflict_get($params) {
     FROM civicrm_prevnext_cache
     WHERE cachekey LIKE "merge%conflicts"
   ');
-  */
+
   $result = CRM_Core_DAO::executeQuery('SELECT * FROM civicrm_merge_conflict WHERE conflicted_field = "" LIMIT 10000');
   while ($result->fetch()) {
     $conflictData = CRM_Core_DAO::executeQuery(
@@ -119,7 +106,7 @@ function civicrm_api3_merge_conflict_get($params) {
     CRM_Core_DAO::executeQuery("
     UPDATE civicrm_merge_conflict 
     SET conflicted_field = %1,
-    value1 = %2, value2 = %3, group_id = %4,
+    value_1 = %2, value_2 = %3, group_id = %4,
     analysis = %7
     WHERE contact_1 = %5
       AND contact_2 = %6
@@ -272,6 +259,15 @@ function _mergeconflict_is_variant($value1, $value2) {
     'michail' => 'mikhail',
     'steven' => 'steve',
     'stephen' => 'steve',
+    'nicolas' => 'nick',
+    'robert' => 'bobby',
+    'bob' => 'robert',
+    'joe' => 'joseph',
+    'bill' => 'william',
+    'Benyamin' => 'Benjamin',
+    'dave' => 'david',
+    'jim' => 'james',
+    'alex' => 'alexander',
   );
   $reverse = array_flip($map);
   if ((isset($map[$value1]) && $map[$value1] === $value2)
