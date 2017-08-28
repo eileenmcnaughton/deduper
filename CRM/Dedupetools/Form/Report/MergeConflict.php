@@ -40,55 +40,55 @@ class CRM_Dedupetools_Form_Report_MergeConflict extends CRM_Report_Form {
         'filters' => array(
           'value_1' => array(
             'title' => E::ts('Value 1'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'value_2' => array(
             'title' => E::ts('Value 2'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'conflicted_field' => array(
             'title' => E::ts('Conflicted Field'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'analysis' => array(
             'title' => E::ts('Analysis'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
         ),
         'order_bys' => array(
           'value_1' => array(
             'title' => E::ts('Value 1'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'value_2' => array(
             'title' => E::ts('Value 2'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'conflicted_field' => array(
             'title' => E::ts('Conflicted Field'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'analysis' => array(
             'title' => E::ts('Analysis'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
         ),
         'group_bys' => array(
           'value_1' => array(
             'title' => E::ts('Value 1'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'value_2' => array(
             'title' => E::ts('Value 2'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'conflicted_field' => array(
             'title' => E::ts('Conflicted Field'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
           'analysis' => array(
             'title' => E::ts('Analysis'),
-            'default' => TRUE,
+            'type' => CRM_Utils_Type::T_STRING,
           ),
         ),
       ),
