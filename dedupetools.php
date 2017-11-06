@@ -122,6 +122,56 @@ function dedupetools_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _dedupetools_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
 
+/**
+ * @param string $op Operation
+ *   Some examples of the operation are below:
+ *     - create.new.shortcuts - shortcuts available from the 'create new' button.
+ *     - view.contact.activity - shortcuts available from actions tab.
+ *     - view.contact.userDashBoard - tbc
+ *     - pdfFormat.manage.action - tbc
+ *
+ *     - Search results rows eg.
+ *       - note.selector.row
+ *       - survey.dashboard.row
+ *
+ * @param string $objectName (e.g. Contact for view.contact.activity)
+ * @param int $objectId
+ * @param array $links
+ * @param int $mask
+ * @param array $values
+ */
+function dedupetools_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
+ $b = $links;
+ if ($objectName !== 'Contact' || $op !== 'view.contact.activity') {
+   return;
+ }
+ try {
+  $ruleGroups = civicrm_api3('RuleGroup', 'get', array(
+    'contact_type' => civicrm_api3('Contact', 'getvalue' , array('id' => $objectId, 'return' => 'contact_type')),
+  ));
+
+  $contactIDS = array($objectId);
+  foreach ($ruleGroups['values'] as $ruleGroup) {
+    $links[] = array(
+      'title' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
+      'name' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
+      'url' => CRM_Utils_System::url('civicrm/contact/dedupefind', array(
+        'reset' => 1,
+        'action' => 'update',
+        'rgid' => $ruleGroup['id'],
+        'criteria' => json_encode(array('contact' => array('id' => array('IN' => $contactIDS)))),
+        'limit' => count($contactIDS),
+      )),
+
+    );
+  }
+ }
+ catch (CiviCRM_API3_Exception $e) {
+   // This would most likely happen if viewing a deleted contact since we are not forcing
+   // them to be returned. Keep calm & carry on.
+ }
+}
+
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
