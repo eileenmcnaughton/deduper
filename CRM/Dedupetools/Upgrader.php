@@ -36,9 +36,9 @@ class CRM_Dedupetools_Upgrader extends CRM_Dedupetools_Upgrader_Base {
 
   /**
    * Example: Run an external SQL script when the module is uninstalled.
-   *
+   */
   public function uninstall() {
-   $this->executeSqlFile('sql/myuninstall.sql');
+   $this->executeSqlFile('sql/uninstall.sql');
   }
 
   /**

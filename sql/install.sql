@@ -16,17 +16,3 @@ CREATE TABLE `civicrm_merge_conflict` (
   KEY `conflicted_field` (`conflicted_field`),
   KEY `group_id` ( `group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE `civicrm_merge_matches` (
-  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  conflicted_field varchar(255) NOT NULL DEFAULT '',
-  `value_1` varchar(255) NOT NULL DEFAULT '',
-  `value_2` varchar(255) NOT NULL DEFAULT '',
-  `probability` int(10) NOT NULL DEFAULT 0,
-  `created_id` int(10) NULL,
-  `created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `value_1` (`value_1`,`value_2`),
-  KEY `value_2` (`value_2`,`value_1`),
-  KEY `conflicted_field` (`conflicted_field`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

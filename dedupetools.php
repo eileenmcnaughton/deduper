@@ -123,53 +123,50 @@ function dedupetools_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
 }
 
 /**
- * @param string $op Operation
- *   Some examples of the operation are below:
- *     - create.new.shortcuts - shortcuts available from the 'create new' button.
- *     - view.contact.activity - shortcuts available from actions tab.
- *     - view.contact.userDashBoard - tbc
- *     - pdfFormat.manage.action - tbc
+ * Add dedupe searches to actions available.
  *
- *     - Search results rows eg.
- *       - note.selector.row
- *       - survey.dashboard.row
- *
- * @param string $objectName (e.g. Contact for view.contact.activity)
- * @param int $objectId
- * @param array $links
- * @param int $mask
- * @param array $values
+ * @param array $actions
+ * @param int $contactID
  */
-function dedupetools_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
- $b = $links;
- if ($objectName !== 'Contact' || $op !== 'view.contact.activity') {
-   return;
- }
- try {
-  $ruleGroups = civicrm_api3('RuleGroup', 'get', array(
-    'contact_type' => civicrm_api3('Contact', 'getvalue' , array('id' => $objectId, 'return' => 'contact_type')),
-  ));
+function dedupetools_civicrm_summaryActions(&$actions, $contactID) {
+  try {
+    $ruleGroups = civicrm_api3('RuleGroup', 'get', array(
+      'contact_type' => civicrm_api3('Contact', 'getvalue' , array('id' => $contactID, 'return' => 'contact_type')),
+    ));
+    $weight = 500;
 
-  $contactIDS = array($objectId);
-  foreach ($ruleGroups['values'] as $ruleGroup) {
-    $links[] = array(
-      'title' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
-      'name' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
-      'url' => CRM_Utils_System::url('civicrm/contact/dedupefind', array(
-        'reset' => 1,
-        'action' => 'update',
-        'rgid' => $ruleGroup['id'],
-        'criteria' => json_encode(array('contact' => array('id' => array('IN' => $contactIDS)))),
-        'limit' => count($contactIDS),
-      )),
-
-    );
+    $contactIDS = array($contactID);
+    foreach ($ruleGroups['values'] as $ruleGroup) {
+      $actions['otherActions']['dupe' . $ruleGroup['id']] = array(
+        'title' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
+        'name' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
+        'weight' => $weight,
+        'ref' => 'dupe' . $ruleGroup['id'],
+        'key' => 'dupe' . $ruleGroup['id'],
+        'href' => CRM_Utils_System::url('civicrm/contact/dedupefind', array(
+          'reset' => 1,
+          'action' => 'update',
+          'rgid' => $ruleGroup['id'],
+          'criteria' => json_encode(array('contact' => array('id' => array('IN' => $contactIDS)))),
+          'limit' => count($contactIDS),
+        )),
+      );
+      $weight++;
+    }
   }
- }
- catch (CiviCRM_API3_Exception $e) {
-   // This would most likely happen if viewing a deleted contact since we are not forcing
-   // them to be returned. Keep calm & carry on.
- }
+  catch (CiviCRM_API3_Exception $e) {
+    // This would most likely happen if viewing a deleted contact since we are not forcing
+    // them to be returned. Keep calm & carry on.
+  }
+}
+
+/**
+ * Keep merge conflict analysis out of log tables. It is temporary data.
+ *
+ * @param array $logTableSpec
+ */
+function dedupetools_civicrm_alterLogTables(&$logTableSpec) {
+  unset($logTableSpec['civicrm_merge_conflict']);
 }
 
 // --- Functions below this ship commented out. Uncomment as required. ---
