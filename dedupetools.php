@@ -141,7 +141,7 @@ function dedupetools_civicrm_summaryActions(&$actions, $contactID) {
         'title' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
         'name' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
         'weight' => $weight,
-        'ref' => 'dupe' . $ruleGroup['id'],
+        'ref' => 'dupe-rule crm-contact_activities-list',
         'key' => 'dupe' . $ruleGroup['id'],
         'href' => CRM_Utils_System::url('civicrm/contact/dedupefind', array(
           'reset' => 1,
