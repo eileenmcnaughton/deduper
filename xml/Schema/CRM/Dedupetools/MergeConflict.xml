@@ -21,10 +21,41 @@
   </primaryKey>
 
   <field>
-    <name>contact_id</name>
+    <name>contact_1</name>
     <type>int unsigned</type>
     <comment>FK to Contact</comment>
-    <add>4.4</add>
+    <add>1.0</add>
   </field>
-
+  <field>
+    <name>contact_2</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact</comment>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>group_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Group</comment>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>conflicted_field</name>
+    <type>varchar</type>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>value_1</name>
+    <type>varchar</type>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>value_2</name>
+    <type>varchar</type>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>analysis</name>
+    <type>varchar</type>
+    <add>1.0</add>
+  </field>
 </table>
