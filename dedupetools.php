@@ -129,6 +129,9 @@ function dedupetools_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  * @param int $contactID
  */
 function dedupetools_civicrm_summaryActions(&$actions, $contactID) {
+  if ($contactID === NULL) {
+    return;
+  }
   try {
     $ruleGroups = civicrm_api3('RuleGroup', 'get', array(
       'contact_type' => civicrm_api3('Contact', 'getvalue' , array('id' => $contactID, 'return' => 'contact_type')),
@@ -169,16 +172,43 @@ function dedupetools_civicrm_alterLogTables(&$logTableSpec) {
   unset($logTableSpec['civicrm_merge_conflict']);
 }
 
-// --- Functions below this ship commented out. Uncomment as required. ---
+/**
+ * This hook is called to display the list of actions allowed after doing a search,
+ * allowing you to inject additional actions or to remove existing actions.
+ *
+ * @param string $objectType
+ * @param array $tasks
+ */
+function dedupetools_civicrm_searchTasks($objectType, &$tasks) {
+  if ($objectType === 'contact') {
+    $tasks[] = [
+      'title' => ts('Find duplicates for these contacts'),
+      'class' => 'CRM_Contact_Form_Task_FindDuplicates',
+      'result' => TRUE,
+    ];
+
+  }
+}
 
 /**
  * Implements hook_civicrm_preProcess().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
+ */
 function dedupetools_civicrm_preProcess($formName, &$form) {
-
-} // */
+  if ($formName === 'CRM_Contact_Form_Merge') {
+    // Re-add colour coding - sill not be required when issue is resolved.
+    // https://github.com/civicrm/org.civicrm.shoreditch/issues/373
+    CRM_Core_Resources::singleton()->addStyle('
+    /* table row highlightng */
+    .page-civicrm-contact-merge .crm-container table.row-highlight tr.crm-row-ok td{
+       background-color: #EFFFE7 !important;
+    }
+    .page-civicrm-contact-merge .crm-container table.row-highlight .crm-row-error td{
+       background-color: #FFECEC !important;
+    }');
+  }
+}
 
 /**
  * Implements hook_civicrm_navigationMenu().
