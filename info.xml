@@ -2,7 +2,7 @@
 <extension key="org.wikimedia.dedupetools" type="module">
   <file>dedupetools</file>
   <name>Dedupe tools</name>
-  <description>FIXME</description>
+  <description>Various tools to help with deduping</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>eileen</author>
