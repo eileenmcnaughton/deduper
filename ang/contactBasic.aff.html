@@ -1,1 +1,18 @@
-<div>Hello {{routeParams.name}}</div>
+<div ng-if="!options.contact_id">
+  {{ts('No contact id provided')}}
+</div>
+<h1 class="basic-contact-heading" ng-show="!contact['result'].display_name">{{options.display_name}}</h1>
+<h1 class="basic-contact-heading" ng-bind="contact['result'].display_name">{{options.display_name}}</h1>
+<div ng-if="options.contact_id"
+     afform-api3="['Contact', 'getsingle', {id: options.contact_id}]"
+     afform-api3-ctrl="contact">
+
+  <div><strong class="basic-contact-field">Contact ID</strong>: {{contact['result'].contact_id}}</div>
+  <div><strong class="basic-contact-field">First Name</strong>: <div class="crm-contact-editable">{{contact['result'].first_name}}</div></div>
+  <div><strong class="basic-contact-field crm-contact-editable">Middle Name</strong>: {{contact['result'].middle_name}}</div>
+  <div><strong class="basic-contact-field crm-contact-editable">Last Name</strong>: {{contact['result'].last_name}}</div>
+  <div><strong class="basic-contact-field">{{ts('Primary Email')}}</strong>: {{contact['result'].email}}</div>
+  <div><strong class="basic-contact-field">Contact Type</strong>: {{contact['result'].contact_type}}</div>
+  <div><strong class="basic-contact-field">{{ts('Display Name')}}</strong>: <a ng-if="options.contact_url" href="{{options.contact_url}}{{contact['result'].contact_id}}">{{contact['result'].display_name}}</a></div>
+
+</div>

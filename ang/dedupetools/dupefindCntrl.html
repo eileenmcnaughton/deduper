@@ -1,49 +1,58 @@
-<div class="crm-container">
-  <div crm-ui-debug="myContact"></div>
-
-  <h1 crm-page-title>{{ts('About %1', {1: myContact.first_name + ' ' + myContact.last_name})}}</h1>
-
+<div id="bootstrap-theme" class="crm-container">
   <form name="myForm" crm-ui-id-scope>
-
     <div class="help">
-      <p>{{ts('This is an auto-generated skeletal page.')}}</p>
-
-      <p>{{ts('To view more debugging information, edit the URL and include "?angularDebug=1".')}}</p>
+      <div>{{ ts('Dedupe Rule') }}
+        <input ng-model="ruleGroupID" title="Dedupe rule" crm-ui-select="{placeholder: ts('Select rule'), width: 300, data: ruleGroups, allowClear: false}" />
+        {{ ts(' will be used to find matches for the first ')}} <input ng-model="limit"/> {{ ts(' contacts found matching the criteria below:') }}
+      </div>
     </div>
 
-    <div crm-ui-accordion="{title: ts('Greeting')}">
-      <p ng-show="myContact.first_name">{{ ts('Hello, %1.', {1: myContact.first_name}) }}</p>
+    <div>
 
-      <p ng-show="!myContact.first_name">{{ ts('Hello, stranger.') }}</p>
+    <div class="clearfix" ng-repeat="(index, clause) in criteria">
+      <input ng-model="clause[0]" ng-disabled="!fieldList.length" ng-class="{loading: !fieldList.length}" crm-ui-select="{placeholder: ts('Select criteria'), allowClear: true, data: fieldList}" />
+      <input ng-model="clause[1]" ng-disabled="!fieldList.length" ng-class="{loading: !fieldList.length}" crm-ui-select="{placeholder: ts('Select criteria'), data: operators}" />
+      <input ng-model="clause[2]" dedupe-exp-value="{field: clause[0], op: clause[1], isExtra: false}" />
+      <div ng-show="(clause[1] === 'BETWEEN' || clause[1] === 'NOT BETWEEN')"> {{ ts('And')}}
+      <input ng-model="clause[3]"  /></div>
     </div>
+    <div class="clearfix">
+      <input ng-model="newClause" title="Add a single clause" crm-ui-select="{data: fieldList, placeholder: 'Add clause'}" />
+    </div>
+  </div>
 
-    <div crm-ui-accordion="{title: ts('About Me')}">
-      <div class="crm-block">
-        <div class="crm-group">
-          <div crm-ui-field="{name: 'myForm.first_name', title: ts('Name'), help: hs('full_name')}">
-            <input
-              crm-ui-id="myForm.first_name"
-              name="first_name"
-              ng-model="myContact.first_name"
-              class="crm-form-text"
-              placeholder="{{ts('First')}}"
-              />
-            <input
-              crm-ui-id="myForm.last_name"
-              name="last_name"
-              ng-model="myContact.last_name"
-              class="crm-form-text"
-              placeholder="{{ts('Last')}}"
-              />
+  <div>
+    <a href="{{url}}">{{url}}</a>
+  </div>
+  <div>
+    <button class="btn btn-danger" crm-icon="fa-bolt" ng-show=!isMerging ng-disabled="!ruleGroupID || !limit" ng-click="batchMerge()">{{ ts('Batch Merge') }}</button>
+    <button ng-show=isMerging>{{ ts('Merging in progress - this could take a while.... enough time for you to stand up & do some stretches....') }}</button>
+  </div>
+  <div ng-show="hasMerged && !isMerging">
+    {{ ts('An automated merge has been attempted against these criteria - ') }}
+    {{mergedCount}} {{ ts('contacts merged') }}
+    {{skippedCount}} {{ ts('contacts not merged due to conflicts') }}
+
+  </div>
+
+  <div ng-repeat="mergePair in skipped|limitTo:4">
+    <div class='panel panel-default'>
+      <div class="panel-heading">{{mergePair['dstName']}} vs {{mergePair['srcName']}}</div>
+      <div class='panel-body'>
+        <div class='col-md-4'  contact-basic="{contact_id: mergePair['main_id'], display_name : mergePair['dstName'], 'contact_url' : contactURL}"></div>
+        <div class='col-md-4'>
+          <div conflict-basic="{conflicts: mergePair['conflicts'], main_id : mergePair['main_id'], other_id : mergePair['other_id'], other_display_name : mergePair['srcName'],  main_display_name : mergePair['dstName'], fieldSpec : contactFields}">
           </div>
+          <div><a href="{{mergeURL}}&cid={{mergePair['main_id']}}&oid={{mergePair['other_id']}}">Manual Merge</a></div>
+          <button class="btn btn-primary" id="force-retry" ng-disabled=isRowMerging ng-click="retryMerge(mergePair['main_id'], mergePair['other_id'])">Retry Merge</button>
+          <button class="btn btn-danger" id="force-merge" ng-disabled=isRowMerging ng-click="forceMerge(mergePair['main_id'], mergePair['other_id'])">Force Merge</button>
+          <button class="btn btn-success" id="dedupe-exception" ng-disabled=isRowMerging ng-click="dedupeException(mergePair['main_id'], mergePair['other_id'])">Mark non-dupe</button>
         </div>
-      </div>
-
-      <div>
-        <button ng-click="save()">{{ts('Save')}}</button>
-      </div>
+        <div class='col-md-4' contact-basic="{contact_id: mergePair['other_id'], display_name : mergePair['srcName'], 'contact_url' : contactURL}"></div>
     </div>
-
+  </div>
+  </div>
+    <div class="clear"></div>
   </form>
 
 </div>
