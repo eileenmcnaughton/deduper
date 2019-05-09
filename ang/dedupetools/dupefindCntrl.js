@@ -65,7 +65,7 @@
     });
     $scope.criteria = [];
     $scope.fieldList = fieldList;
-    $scope.limit = 50000;
+    $scope.limit = 1000;
     $scope.newClause = null;
     $scope.ruleGroups = [];
     $scope.mergedCount = 0;
@@ -133,47 +133,68 @@
     writeUrl();
 
 
+    /**
+     * Format the chosen criteria into a json string.
+     *
+     * @returns {*}
+     */
     function formatCriteria() {
-      var contactCriteria = startCriteria = {'contact': {}};
+      var contactCriteria = {};
+      var startCriteria = {};
       _.each($scope.criteria, function (criterion) {
         if (criterion[1] === '=') {
-          contactCriteria['contact'][criterion[0]] = criterion[2];
+          contactCriteria[criterion[0]] = criterion[2];
         }
         else if (criterion[1] === 'BETWEEN' || criterion[1] === 'NOT BETWEEN') {
-          contactCriteria['contact'][criterion[0]] = {};
-          contactCriteria['contact'][criterion[0]][criterion[1]] = [criterion[2], criterion[3]];
+          contactCriteria[criterion[0]] = {};
+          contactCriteria[criterion[0]][criterion[1]] = [criterion[2], criterion[3]];
         }
         else {
-          contactCriteria['contact'][criterion[0]] = {};
-          contactCriteria['contact'][criterion[0]][criterion[1]] = criterion[2];
+          contactCriteria[criterion[0]] = {};
+          contactCriteria[criterion[0]][criterion[1]] = criterion[2];
         }
 
       });
-      if (contactCriteria === startCriteria) {
+      if (JSON.stringify(contactCriteria) === JSON.stringify(startCriteria)) {
         // Stick with an empty array to reflect what would happen on the core dedupe screen. This gets
         // us the same cachekey
         return {};
       }
-      return contactCriteria;
+      return {'contact': contactCriteria};
     }
 
-    function writeUrl(isFromMerge) {
-      var contactCriteria = formatCriteria();
-      // We could do this second but maybe the next bit is slow...
-      $scope.url = CRM.url('civicrm/contact/dedupefind', $.param({'reset': 1, 'action' : 'update', 'rgid' : $scope.ruleGroupID, 'limit' : $scope.limit, 'context' : ($scope.hasMerged ? 'conflicts' : ''),'criteria' : JSON.stringify(contactCriteria)}));
-
+    function getCachedMergeInfo(contactCriteria) {
       crmApi('Merge', 'getcacheinfo', {
-        'rule_group_id' : $scope.ruleGroupID,
-        'criteria' : contactCriteria
+        'rule_group_id': $scope.ruleGroupID,
+        'criteria': contactCriteria
       }).then(function (data) {
           $scope.skippedCount = data['values'][0]['skipped'].length;
-          $scope.skipped = data['values'][0]['skipped'];
+          if (data['values'][0]['skipped'] < 25) {
+            // more than 25 might just be row limited....
+            $scope.skipped = data['values'][0]['skipped'];
+          }
           // We might have just merged, or we might have reloaded earlier results.
-          $scope.hasMerged = isFromMerge ? true : (data['values'][0]['skipped'].length > 0);
-          // Updated url with conflicts context.
-          $scope.url = CRM.url('civicrm/contact/dedupefind', $.param({'reset': 1, 'action' : 'update', 'rgid' : $scope.ruleGroupID, 'limit' : $scope.limit, 'context' : ($scope.hasMerged ? 'conflicts' : ''),'criteria' : JSON.stringify(contactCriteria)}));
-      }
+          $scope.hasMerged = (data['values'][0]['skipped'].length > 0);
+        }
       );
+    }
+
+    function updateUrl(contactCriteria) {
+      $scope.url = CRM.url('civicrm/contact/dedupefind', $.param({
+        'reset': 1,
+        'action': 'update',
+        'rgid': $scope.ruleGroupID,
+        'limit': $scope.limit,
+        'context': 'conflicts',
+        'criteria': JSON.stringify(contactCriteria)
+      }));
+    }
+
+    function writeUrl() {
+      var contactCriteria = formatCriteria();
+      // We could do this second but maybe the next bit is slow...
+      updateUrl(contactCriteria);
+      getCachedMergeInfo(contactCriteria);
     }
 
     $scope.forceMerge = function (mainID, otherID) {
@@ -232,7 +253,7 @@
         'criteria' : formatCriteria()
       }).then(function (data) {
         $scope.isMerging = false;
-        writeUrl(true);
+        getCachedMergeInfo(formatCriteria());
         $scope.mergedCount = data['values']['merged'].length;
         $scope.skippedCount = data['values']['skipped'].length;
         $scope.skipped = data['values']['skipped'];
