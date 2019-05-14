@@ -100,6 +100,7 @@
         }
       });
     });
+    var delayInMs = 2000;
     $scope.$watch('criteria', function(values) {
       // Remove empty values
       _.each(values, function(clause, index) {
@@ -107,8 +108,11 @@
           values.splice(index, 1);
         }
       });
-      $scope.hasMerged = false;
-      writeUrl();
+      $timeout.cancel(timeoutPromise);
+      timeoutPromise = $timeout(function() {
+        $scope.hasMerged = false;
+        writeUrl();
+      }, delayInMs);
     }, true);
 
     $scope.$watch('ruleGroupID', function() {
@@ -168,13 +172,16 @@
         'rule_group_id': $scope.ruleGroupID,
         'criteria': contactCriteria
       }).then(function (data) {
-          $scope.skippedCount = data['values'][0]['skipped'].length;
-          if (data['values'][0]['skipped'] < 25) {
-            // more than 25 might just be row limited....
-            $scope.skipped = data['values'][0]['skipped'];
+        var results = data.values[0];
+          $scope.skipped = results.skipped;
+          if (results.stats.skipped !== undefined) {
+            $scope.skippedCount = results.stats.skipped;
+          }
+          else {
+            $scope.skippedCount = results.skipped.length;
           }
           // We might have just merged, or we might have reloaded earlier results.
-          $scope.hasMerged = (data['values'][0]['skipped'].length > 0);
+          $scope.hasMerged = (data['values'][0]['skipped'].length > 0 || data.values[0].stats.length);
         }
       );
     }
@@ -190,6 +197,7 @@
       }));
     }
 
+    var timeoutPromise;
     function writeUrl() {
       var contactCriteria = formatCriteria();
       // We could do this second but maybe the next bit is slow...

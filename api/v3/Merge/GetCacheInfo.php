@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Merge redo spec
+ * Get information about cached matches
  *
  * @param array $spec description of fields supported by this API call
  *
@@ -14,14 +14,15 @@ function _civicrm_api3_merge_getcacheinfo_spec(&$spec) {
 }
 
 /**
- * Redo merge.
+ * Get cache match info
  *
- * This function undeletes a merged contact and remerges it. This could be used to
- * fix a merge where a deadlock caused some data to be left behind.
+ * This function retrieves cached information about merge attempts.
  *
  * @param array $params
  * @return array API result descriptor
+ *
  * @throws API_Exception
+ * @throws CiviCRM_API3_Exception
  */
 function civicrm_api3_merge_getcacheinfo($params) {
   $cacheKeyString = CRM_Dedupe_Merger::getMergeCacheKeyString(
@@ -59,7 +60,7 @@ function civicrm_api3_merge_getcacheinfo($params) {
       ];
     }
     $match['conflicts'] = $conflicts;
-    $cachedRows[$matches['dstID']][] = $match;
+    $cachedRows[$match['dstID']][] = $match;
     $skippedRows[] = $match;
   }
 
