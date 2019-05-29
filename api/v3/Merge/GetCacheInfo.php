@@ -3,6 +3,9 @@
 /**
  * Get information about cached matches
  *
+ * This is intended as a transitional / experimental function - I'm working
+ * to improve api access upstream.
+ *
  * @param array $spec description of fields supported by this API call
  *
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC/API+Architecture+Standards
@@ -15,6 +18,9 @@ function _civicrm_api3_merge_getcacheinfo_spec(&$spec) {
 
 /**
  * Get cache match info
+ *
+ * This is intended as a transitional / experimental function - I'm working
+ * to improve api access upstream.
  *
  * This function retrieves cached information about merge attempts.
  *
@@ -60,14 +66,13 @@ function civicrm_api3_merge_getcacheinfo($params) {
       ];
     }
     $match['conflicts'] = $conflicts;
-    $cachedRows[$match['dstID']][] = $match;
     $skippedRows[] = $match;
   }
 
   return civicrm_api3_create_success([[
     'key' => $cacheKeyString,
     'stats' => $stats,
-    'cached_rows' => $cachedRows,
     'skipped' => $skippedRows,
+    'found' => civicrm_api3('Merge', 'getcount', $params),
   ]]);
 }

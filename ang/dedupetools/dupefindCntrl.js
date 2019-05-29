@@ -4,8 +4,6 @@
   var schema = [];
   // Cache list of entities
   var entities = [];
-  // Field options
-  var fieldOptions = {};
 
   angular.module('dedupetools').config(function($routeProvider) {
       $routeProvider.when('/dupefinder/:api4entity?', {
@@ -18,7 +16,9 @@
         resolve: {
           contactFields: function(crmApi) {
             return crmApi('Contact', 'getfields', {
-              action: 'create'
+              action: 'get',
+              api_action: 'get',
+              options: {'get_options':'all'}
             });
           },
           ruleGroups: function(crmApi) {
@@ -58,7 +58,7 @@
     ]);
     $scope.entities = entities;
     // We have myContact available in JS. We also want to reference it in HTML.
-    $scope.contactFields = contactFields['values'];
+    $scope.contactFields = schema = contactFields['values'];
     var fieldList = [];
     _.each(contactFields['values'], function(spec) {
       fieldList.push({id : [spec.name], text : spec.title});
@@ -70,25 +70,27 @@
     $scope.ruleGroups = [];
     $scope.mergedCount = 0;
     $scope.skippedCount = 0;
-    $scope.skipped = [];
+    $scope.foundCount = 0;
+    $scope.exceptedCount = 0;
+    $scope.duplicatePairs = [];
     $scope.contactsToMerge = [];
+    $scope.hasSearched = false;
     $scope.contactURL = CRM.url('civicrm/contact/view', $.param({'reset': 1, 'cid' : ''}));
     $scope.mergeURL = CRM.url('civicrm/contact/merge', $.param({'reset': 1, 'action' : 'update'}));
     $scope.isRowMerging = false;
+    // Number of matches to fetch at once..
+    // We might expose this.
+    $scope.numberMatchesToFetch = 25;
 
     _.each(ruleGroups['values'], function(spec) {
       $scope.ruleGroups .push({id : spec.id, text : spec.contact_type + ' (' + spec.used + ') ' + spec.title});
-      if (spec.contact_type == 'Individual' && spec.used === 'Unsupervised') {
+      if (spec.contact_type === 'Individual' && spec.used === 'Unsupervised') {
         $scope.ruleGroupID = spec.id;
       }
     });
     $scope.hasMerged = false;
     $scope.isMerging = false;
 
-    var getMetaParams = schema.length ? {} : {schema: ['Entity', 'getFields'], links: ['Entity', 'getLinks']},
-      objectParams = {orderBy: 'ASC', values: ''},
-      helpTitle = '',
-      helpContent = {};
     $scope.entity = $routeParams.api4entity;
 
     $scope.$watch('newClause', function(newValue, oldValue) {
@@ -123,17 +125,6 @@
       writeUrl();
     });
 
-    function fetchMeta() {
-      crmApi4(getMetaParams)
-        .then(function(data) {
-          if (data.schema) {
-            schema = data.schema;
-            entities.length = 0;
-            formatForSelect2(schema, entities, 'name', ['description']);
-          }
-        });
-    }
-    fetchMeta();
     writeUrl();
 
 
@@ -172,16 +163,30 @@
         'rule_group_id': $scope.ruleGroupID,
         'criteria': contactCriteria
       }).then(function (data) {
-        var results = data.values[0];
-          $scope.skipped = results.skipped;
+          var results = data.values[0];
+          $scope.duplicatePairs = results.skipped;
           if (results.stats.skipped !== undefined) {
             $scope.skippedCount = results.stats.skipped;
           }
           else {
-            $scope.skippedCount = results.skipped.length;
+            $scope.skippedCount = 0;
           }
+          $scope.foundCount = parseInt(results.found);
           // We might have just merged, or we might have reloaded earlier results.
           $scope.hasMerged = (data['values'][0]['skipped'].length > 0 || data.values[0].stats.length);
+        }
+      );
+    }
+
+    function getConflicts(to_keep_id, to_remove_id,contactCriteria, pair) {
+      crmApi('Merge', 'get_conflicts', {
+        'rule_group_id': $scope.ruleGroupID,
+        'criteria': contactCriteria,
+        'to_remove_id' : to_remove_id,
+        'to_keep_id' : to_keep_id
+      }).then(function (data) {
+          var results = data.values[0];
+          pair['conflicts'] = results;
         }
       );
     }
@@ -200,6 +205,8 @@
     var timeoutPromise;
     function writeUrl() {
       var contactCriteria = formatCriteria();
+      $scope.hasSearched = false;
+      $scope.exceptedCount = 0;
       // We could do this second but maybe the next bit is slow...
       updateUrl(contactCriteria);
       getCachedMergeInfo(contactCriteria);
@@ -208,8 +215,8 @@
     $scope.forceMerge = function (mainID, otherID) {
       merge(mainID, otherID, 'aggressive');
     };
-    $scope.retryMerge = function retryMerge(mainID, otherID) {
-      merge(mainID, otherID, 'safe');
+    $scope.retryMerge = function retryMerge(mainID, otherID, pair) {
+      merge(mainID, otherID, 'safe', pair);
     };
     $scope.dedupeException = function dedupeException(mainID, otherID) {
       $scope.isRowMerging = true;
@@ -222,7 +229,30 @@
       });
     };
 
-    function merge(to_keep_id, to_remove_id, mode) {
+    $scope.notDuplicates = function notDuplicates() {
+      $scope.isMerging = true;
+      crmApi('Merge', 'mark_duplicate_exception', {
+        'rule_group_id': $scope.ruleGroupID,
+        'criteria': formatCriteria(),
+      }).then (function(result) {
+        getCachedMergeInfo(formatCriteria());
+        $scope.exceptedCount = result.count;
+        $scope.isMerging = false;
+      });
+    };
+
+    /**
+     * Merge two contacts.
+     *
+     * @param to_keep_id
+     *  Contact ID to be kept
+     * @param to_remove_id
+     *  Contact ID to be deleted by merge.
+     * @param mode
+     *   safe or aggressive
+     * @param pair
+     */
+    function merge(to_keep_id, to_remove_id, mode, pair) {
       $scope.isRowMerging = true;
       crmApi('Contact', 'merge', {
         'to_keep_id' : to_keep_id,
@@ -232,29 +262,46 @@
         $scope.isRowMerging = false;
         if (data['values']['merged'].length === 1) {
           removeMergedContact(to_remove_id);
+          $scope.mergedCount++;
         }
+        else {
+          if (typeof pair !== 'undefined') {
+            getConflicts(to_keep_id, to_remove_id, formatCriteria(), pair);
+          }
+        }
+      });
+    }
+
+    function updateFoundCount() {
+      crmApi('Merge', 'getcount', {
+        'rule_group_id': $scope.ruleGroupID,
+        'criteria': formatCriteria()
+      }).then(function (data) {
+        $scope.foundCount = data.result;
       });
     }
 
     function removeMergedContact(id) {
-      _.each($scope.skipped, function(pair, index) {
-        if (pair['main_id'] === id || pair['other_id'] === id ) {
-          $scope.skipped.splice(index, 1);
+      _.each($scope.duplicatePairs, function(pair, index) {
+        if (typeof(pair) !== 'undefined' && (pair['dstID'] === id || pair['srcID'] === id)) {
+          $scope.duplicatePairs.splice(index, 1);
         }
       });
+      updateFoundCount();
     }
 
     function removeMergedMatch(id, id2) {
-      _.each($scope.skipped, function(pair, index) {
-        if (typeof(pair) !== 'undefined' && pair['main_id'] === id && pair['other_id'] === id2 ) {
-          $scope.skipped.splice(index, 1);
+      _.each($scope.duplicatePairs, function(pair, index) {
+        if (typeof(pair) !== 'undefined' && pair['dstID'] === id && pair['srcID'] === id2 ) {
+          $scope.duplicatePairs.splice(index, 1);
         }
       });
+      updateFoundCount();
     }
 
     $scope.batchMerge = function () {
       $scope.isMerging = true;
-      $scope.skipped = [];
+      $scope.duplicatePairs = [];
       crmApi('Job', 'process_batch_merge', {
         'rule_group_id' : $scope.ruleGroupID,
         'limit' : $scope.limit,
@@ -264,12 +311,33 @@
         getCachedMergeInfo(formatCriteria());
         $scope.mergedCount = data['values']['merged'].length;
         $scope.skippedCount = data['values']['skipped'].length;
-        $scope.skipped = data['values']['skipped'];
+        $scope.duplicatePairs = data['values']['skipped'];
         $scope.hasMerged = true;
       });
     };
 
+    $scope.getDuplicates = function () {
+      $scope.isSearching = true;
+      crmApi('Merge', 'get_duplicates', {
+        'rule_group_id' : $scope.ruleGroupID,
+        'options': {'limit' : $scope.numberMatchesToFetch},
+        'search_limit' : $scope.limit,
+        'criteria' : formatCriteria()
+      }).then(function (data) {
+        $scope.duplicatePairs = data['values'];
+        $scope.hasSearched = true;
+        $scope.isSearching = false;
+        crmApi('Merge', 'getcount', {
+          'rule_group_id' : $scope.ruleGroupID,
+          'criteria' : formatCriteria()
+        }).then(function (data) {
+          $scope.foundCount = data.result;
+        });
+      });
+    };
+
   });
+
 
   angular.module('dedupetools').directive('dedupeExpValue', function($routeParams, crmApi4) {
     return {
@@ -286,7 +354,7 @@
 
           function get(entity, fieldNames) {
             if (fieldNames.length === 1) {
-              return _.findWhere(entityFields(entity), {name: fieldNames[0]});
+              return _.findWhere(schema, {name: fieldNames[0]});
             }
             var comboName = _.findWhere(entityFields(entity), {name: fieldNames[0] + '.' + fieldNames[1]});
             if (comboName) {
@@ -325,17 +393,16 @@
             if (_.includes(['=', '!=', '<>', '<', '>=', '<', '<='], op)) {
               $el.crmDatepicker({time: dataType === 'Timestamp'});
             }
-          } else if (_.includes(['=', '!=', '<>'], op)) {
+          } else if (_.includes(['=', '!=', '<>', 'IN', 'NOT IN'], op)) {
+            multi = _.includes(['IN', 'NOT IN'], op);
             if (field.fk_entity) {
               $el.crmEntityRef({entity: field.fk_entity});
             } else if (field.options) {
               $el.addClass('loading').attr('placeholder', ts('- select -')).crmSelect2({allowClear: false, data: [{id: '', text: ''}]});
-              loadFieldOptions(field.entity).then(function(data) {
                 var options = [];
-                _.each(_.findWhere(data, {name: field.name}).options, function(val, key) {
+                _.each(field.options, function(val, key) {
                   options.push({id: key, text: val});
-                });
-                $el.removeClass('loading').select2({data: options});
+                $el.removeClass('loading').select2({multiple: multi, data: options});
               });
             } else if (dataType === 'Boolean') {
               $el.attr('placeholder', ts('- select -')).crmSelect2({allowClear: false, placeholder: ts('- select -'), data: [
@@ -344,16 +411,6 @@
               ]});
             }
           }
-        }
-
-        function loadFieldOptions(entity) {
-          if (!fieldOptions[entity]) {
-            fieldOptions[entity] = crmApi4(entity, 'getFields', {
-              getOptions: true,
-              select: ["name", "options"]
-            });
-          }
-          return fieldOptions[entity];
         }
 
         scope.$watchCollection('data', function(data) {
@@ -366,9 +423,6 @@
       }
     };
   });
-  function entityFields(entity) {
-    return _.result(_.findWhere(schema, {name: entity}), 'fields');
-  }
 
   // Turn a flat array into a select2 array
   function arrayToSelect2(array) {
@@ -377,19 +431,6 @@
       out.push({id: item, text: item});
     });
     return out;
-  }
-
-  // Reformat an existing array of objects for compatibility with select2
-  function formatForSelect2(input, container, key, extra, prefix) {
-    _.each(input, function(item) {
-      var id = (prefix || '') + item[key];
-      var formatted = {id: id, text: id};
-      if (extra) {
-        _.merge(formatted, _.pick(item, extra));
-      }
-      container.push(formatted);
-    });
-    return container;
   }
 
 })(angular, CRM.$, CRM._);

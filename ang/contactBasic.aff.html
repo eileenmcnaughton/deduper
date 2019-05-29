@@ -1,18 +1,42 @@
+<form name="basicContact" editable-form crm-ui-id-scope>
+
 <div ng-if="!options.contact_id">
   {{ts('No contact id provided')}}
 </div>
-<h1 class="basic-contact-heading" ng-show="!contact['result'].display_name">{{options.display_name}}</h1>
-<h1 class="basic-contact-heading" ng-bind="contact['result'].display_name">{{options.display_name}}</h1>
 <div ng-if="options.contact_id"
-     afform-api3="['Contact', 'getsingle', {id: options.contact_id}]"
+     afform-api3="['Contact', 'getsingle', {id: options.contact_id, return: 'first_name,last_name,email, middle_name, display_name, contact_type'}]"
      afform-api3-ctrl="contact">
+  <h1 class="basic-contact-heading" ng-show="!contact['result'].display_name">{{options.display_name}}</h1>
+  <div><h1 class="basic-contact-heading" ng-bind="contact['result'].display_name">{{contact['result'].display_name}}</h1></div>
+  <div>
+    <button class="btn btn-secondary float-right"
+    aff-api4-action="['Contact','update', {
+    'where' :[['id','=', options.contact_id]],
+    'values' : {
+      last_name: contact['result'].last_name,
+      first_name: contact['result'].first_name,
+      middle_name: contact['result'].middle_name,
+      email: contact['result'].email
+      }
+    }]"
+    on-success=contact.refresh()
+  >{{ts('Save')}}</button>
+  </div>
+  <div><strong class="basic-contact-field">{{ ts('Contact ID') }}</strong>: {{contact['result'].contact_id}}</div>
+  <div><strong class="basic-contact-field">{{ ts('First Name') }}</strong>: <span editable-text="contact['result'].first_name" e-single>{{contact['result'].first_name || ".."}}</span></div>
+  <div><strong class="basic-contact-field">{{ ts('Middle Name') }}</strong>:<a href='#' editable-text="contact['result'].middle_name" e-label="Middle Name" e-single>{{contact['result'].middle_name || ".."}}</a></div>
+  <div><strong class="basic-contact-field">{{ ts('Last Name') }}</strong>: <span editable-text="contact['result'].last_name" e-single>{{contact['result'].last_name || ".."}}</span></div>
 
-  <div><strong class="basic-contact-field">Contact ID</strong>: {{contact['result'].contact_id}}</div>
-  <div><strong class="basic-contact-field">First Name</strong>: <div class="crm-contact-editable">{{contact['result'].first_name}}</div></div>
-  <div><strong class="basic-contact-field crm-contact-editable">Middle Name</strong>: {{contact['result'].middle_name}}</div>
-  <div><strong class="basic-contact-field crm-contact-editable">Last Name</strong>: {{contact['result'].last_name}}</div>
-  <div><strong class="basic-contact-field">{{ts('Primary Email')}}</strong>: {{contact['result'].email}}</div>
-  <div><strong class="basic-contact-field">Contact Type</strong>: {{contact['result'].contact_type}}</div>
-  <div><strong class="basic-contact-field">{{ts('Display Name')}}</strong>: <a ng-if="options.contact_url" href="{{options.contact_url}}{{contact['result'].contact_id}}">{{contact['result'].display_name}}</a></div>
+  <div><strong class="basic-contact-field">{{ts('Primary Email')}}</strong>: <span editable-text="contact['result'].email" e-single>{{contact['result'].email || ".."}}</span></div>
+  <div><strong class="basic-contact-field">{{ ts('Contact Type') }}</strong>: {{contact['result'].contact_type}}</div>
+  <div><strong class="basic-contact-field">{{ts('Display Name')}}</strong>: <a target="_blank" ng-if="options.contact_url" href="{{options.contact_url}}{{contact['result'].contact_id}}">{{contact['result'].display_name}}</a></div>
 
+  <p></p>
+
+  <div ng-if="options.contact_id"
+       afform-api3="['Contribution', 'get', {contact_id: options.contact_id, 'sequential': 1, return : 'receive_date', options: {limit: 1, sort: 'receive_date DESC'}}]"
+       afform-api3-ctrl="contribution">
+    <div ng-show="contribution.result.values[0]"><div>{{ ts('Last Contributed on')}}</div><div></div><strong>{{contribution.result.values[0].receive_date}}</strong></div></div>
+  </div>
 </div>
+</form>
