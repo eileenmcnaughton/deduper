@@ -1,7 +1,5 @@
 (function(angular, $, _) {
 
-  // Cache schema metadata
-  var schema = [];
   // Cache list of entities
   var entities = [];
 
@@ -38,7 +36,8 @@
     // Main angular function.
     // The ts() and hs() functions help load strings for this module.
     var ts = $scope.ts = CRM.ts('dedupetools');
-    var hs = $scope.hs = crmUiHelp({file: 'CRM/dedupetools/dupefindCntrl'}); // See: templates/CRM/dedupetools/dupefindCntrl.hlp
+    var hs = $scope.hs = crmUiHelp({file: 'CRM/dedupetools/dupefindCntrl'});// See: templates/CRM/dedupetools/dupefindCntrl.hlp
+    var self = this;
     $scope.operators = arrayToSelect2([
       '=',
         '<=',
@@ -81,6 +80,7 @@
     // Number of matches to fetch at once..
     // We might expose this.
     $scope.numberMatchesToFetch = 25;
+    $scope.tilesToShow = 2;
 
     _.each(ruleGroups['values'], function(spec) {
       $scope.ruleGroups .push({id : spec.id, text : spec.contact_type + ' (' + spec.used + ') ' + spec.title});
@@ -338,91 +338,6 @@
 
   });
 
-
-  angular.module('dedupetools').directive('dedupeExpValue', function($routeParams, crmApi4) {
-    return {
-      scope: {
-        data: '=dedupeExpValue'
-      },
-      link: function (scope, element, attrs) {
-        var ts = scope.ts = CRM.ts('api4'),
-          entity = $routeParams.api4entity;
-
-        function getField(fieldName) {
-          var fieldNames = fieldName.split('.');
-          return get(entity, fieldNames);
-
-          function get(entity, fieldNames) {
-            if (fieldNames.length === 1) {
-              return _.findWhere(schema, {name: fieldNames[0]});
-            }
-            var comboName = _.findWhere(entityFields(entity), {name: fieldNames[0] + '.' + fieldNames[1]});
-            if (comboName) {
-              return comboName;
-            }
-            var linkName = fieldNames.shift(),
-              entityLinks = _.findWhere(links, {entity: entity}).links,
-              newEntity = _.findWhere(entityLinks, {alias: linkName}).entity;
-            return get(newEntity, fieldNames);
-          }
-        }
-
-        function destroyWidget() {
-          var $el = $(element);
-          if ($el.is('.crm-form-date-wrapper .crm-hidden-date')) {
-            $el.crmDatepicker('destroy');
-          }
-          if ($el.is('.select2-container + input')) {
-            $el.crmEntityRef('destroy');
-          }
-          $(element).removeData().removeAttr('type').removeAttr('placeholder').show();
-        }
-
-        function makeWidget(field, op, isExtra) {
-          var $el = $(element),
-            dataType = field.data_type;
-          if (op === 'IS NULL' || op === 'IS NOT NULL') {
-            $el.hide();
-            return;
-          }
-          if (isExtra && op === 'BETWEEN' && op === 'NOT BETWEEN') {
-            $el.show();
-            return;
-          }
-          if (dataType === 'Timestamp' || dataType === 'Date') {
-            if (_.includes(['=', '!=', '<>', '<', '>=', '<', '<='], op)) {
-              $el.crmDatepicker({time: dataType === 'Timestamp'});
-            }
-          } else if (_.includes(['=', '!=', '<>', 'IN', 'NOT IN'], op)) {
-            multi = _.includes(['IN', 'NOT IN'], op);
-            if (field.fk_entity) {
-              $el.crmEntityRef({entity: field.fk_entity});
-            } else if (field.options) {
-              $el.addClass('loading').attr('placeholder', ts('- select -')).crmSelect2({allowClear: false, data: [{id: '', text: ''}]});
-                var options = [];
-                _.each(field.options, function(val, key) {
-                  options.push({id: key, text: val});
-                $el.removeClass('loading').select2({multiple: multi, data: options});
-              });
-            } else if (dataType === 'Boolean') {
-              $el.attr('placeholder', ts('- select -')).crmSelect2({allowClear: false, placeholder: ts('- select -'), data: [
-                {id: '1', text: ts('Yes')},
-                {id: '0', text: ts('No')}
-              ]});
-            }
-          }
-        }
-
-        scope.$watchCollection('data', function(data) {
-          destroyWidget();
-          var field = getField(data.field);
-          if (field) {
-            makeWidget(field, data.op || '=', data.isExtra);
-          }
-        });
-      }
-    };
-  });
 
   // Turn a flat array into a select2 array
   function arrayToSelect2(array) {
