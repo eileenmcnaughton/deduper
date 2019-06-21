@@ -209,12 +209,11 @@
     }
 
     function getCachedMergeInfo(contactCriteria) {
-      crmApi('Merge', 'getcacheinfo', {
+      crmApi('Dedupe', 'getstatistics', {
         'rule_group_id': $scope.ruleGroupID,
         'criteria': contactCriteria
       }).then(function (data) {
           var results = data.values[0];
-          $scope.duplicatePairs = results.skipped;
           if (results.stats.skipped !== undefined) {
             $scope.skippedCount = results.stats.skipped;
           }
@@ -373,14 +372,13 @@
         getCachedMergeInfo(formatCriteria());
         $scope.mergedCount = data['values']['merged'].length;
         $scope.skippedCount = data['values']['skipped'].length;
-        $scope.duplicatePairs = data['values']['skipped'];
         $scope.hasMerged = true;
       });
     };
 
     $scope.getDuplicates = function () {
       $scope.isSearching = true;
-      crmApi('Merge', 'get_duplicates', {
+      crmApi('Dedupe', 'getduplicates', {
         'rule_group_id' : $scope.ruleGroupID,
         'options': {'limit' : $scope.numberMatchesToFetch},
         'search_limit' : $scope.limit,

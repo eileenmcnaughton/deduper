@@ -19,7 +19,7 @@
   <develStage>stable</develStage>
   <requires>org.civicrm.afform</requires>
   <compatibility>
-    <ver>5.13</ver>
+    <ver>5.16</ver>
   </compatibility>
   <comments>Tools to help with deduping</comments>
   <civix>
