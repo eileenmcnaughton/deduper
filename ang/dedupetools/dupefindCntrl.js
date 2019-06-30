@@ -213,16 +213,16 @@
         'rule_group_id': $scope.ruleGroupID,
         'criteria': contactCriteria
       }).then(function (data) {
-          var results = data.values[0];
-          if (results.stats.skipped !== undefined) {
-            $scope.skippedCount = results.stats.skipped;
+          var result = data.values;
+          if (result.skipped !== undefined) {
+            $scope.skippedCount = result.skipped;
           }
           else {
             $scope.skippedCount = 0;
           }
-          $scope.foundCount = parseInt(results.found);
+          $scope.foundCount = parseInt(result.found);
           // We might have just merged, or we might have reloaded earlier results.
-          $scope.hasMerged = (data['values'][0]['skipped'].length > 0 || data.values[0].stats.length);
+          $scope.hasMerged = (result['skipped'].length > 0 || result.stats.length);
         }
       );
     }
@@ -369,10 +369,10 @@
         'criteria' : formatCriteria()
       }).then(function (data) {
         $scope.isMerging = false;
-        getCachedMergeInfo(formatCriteria());
         $scope.mergedCount = data['values']['merged'].length;
         $scope.skippedCount = data['values']['skipped'].length;
         $scope.hasMerged = true;
+        $scope.getDuplicates();
       });
     };
 
