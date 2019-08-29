@@ -260,4 +260,7 @@ function dedupetools_civicrm_alterAPIPermissions($entity, $action, &$params, &$p
     'get' => ['merge duplicate contacts'],
     'create' => ['merge duplicate contacts'],
   ];
+  $permissions['dedupe'] = [
+    'getduplicates' => ['access CiviCRM'],
+  ];
 }
