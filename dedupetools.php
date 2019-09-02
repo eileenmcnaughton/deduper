@@ -268,5 +268,6 @@ function dedupetools_civicrm_alterAPIPermissions($entity, $action, &$params, &$p
   $permissions['exception'] = [
     'default' => ['merge duplicate contacts'],
   ];
+  $permissions['job']['process_batch_merge'] = 'merge duplicate contacts';
   $permissions['contact']['merge'] = ['merge duplicate contacts'];
 }
