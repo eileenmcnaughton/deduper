@@ -34,7 +34,7 @@
     <a href="{{url}}" target="_blank" class="btn btn-link" role="button">{{ts('Go To Merge screen')}}</a>
   </div>
   <div ng-show="!isMerging">
-    <div ng-show="foundCount || hasSearched">{{ ts('Duplicate pairs matching criteria') }}: {{foundCount}}. Showing <a href="#" e-single e-clickable="true" editable-number="tilesToShow">{{tilesToShow}}</a> pairs at a time as <a href="#" e-title="Show merge tiles?" e-single editable-checkbox="deduperCntrl.showTiles">{{ deduperCntrl.showTiles && "merge tiles" || "Rows" }}</a>. </div>
+    <div ng-show="foundCount || hasSearched">{{ ts('Duplicate pairs matching criteria') }}: {{foundCount}}. Showing up to <a href="#" e-single e-clickable="true" editable-number="tilesToShow">{{tilesToShow}}</a> pairs at a time as <a href="#" e-title="Show merge tiles?" e-single editable-checkbox="deduperCntrl.showTiles">{{ deduperCntrl.showTiles && "merge tiles" || "Rows" }}</a>. </div>
     <div ng-show="mergedCount">{{ ts('Contacts merged') }}: {{mergedCount}}</div>
     <div ng-show="skippedCount">{{ ts('Skipped in automated merge attempt') }}: {{skippedCount}}</div>
     <div ng-show="exceptedCount">{{ ts('Contacts marked as exceptions') }}: {{exceptedCount}}</div>
