@@ -17,7 +17,7 @@
   <releaseDate>2019-08-28</releaseDate>
   <version>1.0</version>
   <develStage>stable</develStage>
-  <requires>org.civicrm.afform</requires>
+  <requires>afform</requires>
   <compatibility>
     <ver>5.17</ver>
   </compatibility>
