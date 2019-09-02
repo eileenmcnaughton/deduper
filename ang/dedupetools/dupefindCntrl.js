@@ -211,6 +211,7 @@
     function getCachedMergeInfo(contactCriteria) {
       crmApi('Dedupe', 'getstatistics', {
         'rule_group_id': $scope.ruleGroupID,
+        'search_limit' : $scope.limit,
         'criteria': contactCriteria
       }).then(function (data) {
           var result = data.values;
