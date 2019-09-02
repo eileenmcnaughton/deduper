@@ -236,8 +236,7 @@
         'to_remove_id' : to_remove_id,
         'to_keep_id' : to_keep_id
       }).then(function (data) {
-          var results = data.values['safe'];
-          pair['conflicts']  = results['conflicts'];
+          pair['safe'] = data.values['safe'];
         }
       );
     }
