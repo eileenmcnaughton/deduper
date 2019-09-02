@@ -247,11 +247,12 @@ function dedupetools_civicrm_navigationMenu(&$menu) {
  */
 function dedupetools_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
   // Set permission for all deduping actions to 'merge duplicate contacts'
+  // By 5.18 hopefully none of this will be needed.
   $permissions['merge'] = [
     'getcacheinfo' => ['merge duplicate contacts'],
-    'get_conflicts' => ['merge duplicate contacts'],
     'get_duplicates' => ['merge duplicate contacts'],
     'mark_duplicate_exception' => ['merge duplicate contacts'],
+    'getcount' => ['merge duplicate contacts'],
   ];
   $permissions['rule_group']['get'] = ['merge duplicate contacts'];
   // This isn't really exposed at the moment but it would have the same perms if it were.
@@ -262,5 +263,11 @@ function dedupetools_civicrm_alterAPIPermissions($entity, $action, &$params, &$p
   ];
   $permissions['dedupe'] = [
     'getduplicates' => ['access CiviCRM'],
+    'getstatistics' => ['access CiviCRM'],
   ];
+  // Exception refers to dedupe_exception.
+  $permissions['exception'] = [
+    'default' => ['merge duplicate contacts'],
+  ];
+  $permissions['contact']['merge'] = ['merge duplicate contacts'];
 }
