@@ -249,7 +249,6 @@ function dedupetools_civicrm_alterAPIPermissions($entity, $action, &$params, &$p
   // Set permission for all deduping actions to 'merge duplicate contacts'
   // By 5.18 hopefully none of this will be needed.
   $permissions['merge'] = [
-    'getcacheinfo' => ['merge duplicate contacts'],
     'get_duplicates' => ['merge duplicate contacts'],
     'mark_duplicate_exception' => ['merge duplicate contacts'],
     'getcount' => ['merge duplicate contacts'],
