@@ -228,14 +228,15 @@
     }
 
     function getConflicts(to_keep_id, to_remove_id,contactCriteria, pair) {
-      crmApi('Merge', 'get_conflicts', {
+      crmApi('Contact', 'get_merge_conflicts', {
         'rule_group_id': $scope.ruleGroupID,
+        'search_limit' : $scope.limit,
         'criteria': contactCriteria,
         'to_remove_id' : to_remove_id,
         'to_keep_id' : to_keep_id
       }).then(function (data) {
-          var results = data.values[0];
-          pair['conflicts'] = results;
+          var results = data.values['safe'];
+          pair['conflicts']  = results['conflicts'];
         }
       );
     }
