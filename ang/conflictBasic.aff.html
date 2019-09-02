@@ -9,7 +9,7 @@
       <span ng-if="conflict['title']">{{conflict['title']}}</span>
       <span ng-if="!conflict['title']">{{key}}</span>
       <span ng-if="!conflict['display']"><del>{{conflict[options.main_id]}}</del> <strong>{{conflict[options.other_id]}}</strong></span>
-      <div ng-if="conflict['display']"><del>{{conflict['display'][options.main_id]}}</del> <strong>{{conflict['display'][options.other_id]}}</strong></div>
+      <div ng-if="conflict['display']"><div></div><del>{{conflict['display'][options.main_id]}}</del></div><div> <strong>{{conflict['display'][options.other_id]}}</strong></div></div>
     </div>
   </div>
 
