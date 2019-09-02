@@ -296,6 +296,7 @@
       $scope.isMerging = true;
       crmApi('Merge', 'mark_duplicate_exception', {
         'rule_group_id': $scope.ruleGroupID,
+        'search_limit' : $scope.limit,
         'criteria': formatCriteria(),
       }).then (function(result) {
         getCachedMergeInfo(formatCriteria());
@@ -338,6 +339,7 @@
     function updateFoundCount() {
       crmApi('Merge', 'getcount', {
         'rule_group_id': $scope.ruleGroupID,
+        'search_limit' : $scope.limit,
         'criteria': formatCriteria()
       }).then(function (data) {
         $scope.foundCount = data.result;
@@ -367,7 +369,7 @@
       $scope.duplicatePairs = [];
       crmApi('Job', 'process_batch_merge', {
         'rule_group_id' : $scope.ruleGroupID,
-        'limit' : $scope.limit,
+        'search_limit' : $scope.limit,
         'criteria' : formatCriteria()
       }).then(function (data) {
         $scope.isMerging = false;
@@ -391,6 +393,7 @@
         $scope.isSearching = false;
         crmApi('Merge', 'getcount', {
           'rule_group_id' : $scope.ruleGroupID,
+          'search_limit' : $scope.limit,
           'criteria' : formatCriteria()
         }).then(function (data) {
           $scope.foundCount = data.result;

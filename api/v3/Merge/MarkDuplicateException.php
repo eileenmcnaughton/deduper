@@ -14,6 +14,7 @@ function _civicrm_api3_merge_mark_duplicate_exceptionspec(&$spec) {
   $spec['rule_group_id']['api.required'] = 1;
   $spec['group_id'] =['title' => ts('CiviCRM Group')];
   $spec['criteria'] = ['title' => ts('Dedupe criteria')];
+  $spec['search_limit'] = ['title' => ts('Limit of contacts to find matches for'), 'api.required' => TRUE];
 }
 
 /**
@@ -32,7 +33,7 @@ function _civicrm_api3_merge_mark_duplicate_exceptionspec(&$spec) {
  */
 function civicrm_api3_merge_mark_duplicate_exception($params) {
   // @todo be careful if we later enable refillCache since there is no limit...
-  $pairs = CRM_Dedupe_Merger::getDuplicatePairs($params['rule_group_id'], NULL, FALSE, 0, FALSE, '', TRUE, $params['criteria'], CRM_Utils_Array::value('check_permissions', $params));
+  $pairs = CRM_Dedupe_Merger::getDuplicatePairs($params['rule_group_id'], NULL, FALSE, 0, FALSE, '', TRUE, $params['criteria'], CRM_Utils_Array::value('check_permissions', $params), $params['search_limit']);
   foreach ($pairs as $pair) {
     civicrm_api3('Exception', 'create', ['contact_id1' => $pair['dstID'], 'contact_id2' => $pair['srcID']]);
     CRM_Core_DAO::executeQuery('
