@@ -76,6 +76,7 @@
     $scope.exceptedCount = 0;
     $scope.duplicatePairs = [];
     $scope.pagedPairs = [];
+    $scope.hasSuppressedPairs = false;
     $scope.contactsToMerge = [];
     $scope.currentPage = 1;
     $scope.hasSearched = false;
@@ -288,6 +289,7 @@
      */
     $scope.delayPair = function delayPair(mainID, otherID, currentPage) {
       $scope.currentPage = currentPage;
+      $scope.hasSuppressedPairs = true;
       removeMergedMatch(mainID, otherID);
     };
 
@@ -380,7 +382,9 @@
     };
 
     $scope.getDuplicates = function () {
+      $scope.duplicatePairs = [];
       $scope.isSearching = true;
+      $scope.hasSuppressedPairs = false;
       crmApi('Dedupe', 'getduplicates', {
         'rule_group_id' : $scope.ruleGroupID,
         'options': {'limit' : $scope.numberMatchesToFetch},
