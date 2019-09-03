@@ -66,7 +66,7 @@
 
         <div class='col-md-4'>
           <div conflict-basic="{conflicts: mergePair['safe']['conflicts'], main_id : mergePair['srcID'], other_id : mergePair['dstID'], other_display_name : mergePair['dstName'],  main_display_name : mergePair['srcName'], fieldSpec : contactFields}">
-          </div>st
+          </div>
           <button class="btn btn-success btn-block" id="retry-merge" ng-disabled=isRowMerging ng-click="retryMerge(mergePair['dstID'], mergePair['srcID'], mergePair, currentPage)">{{ ts('Safe Merge') }}</button>
           <button class="btn btn-primary btn-block" id="dedupe-exception" ng-disabled=isRowMerging ng-click="dedupeException(mergePair['dstID'], mergePair['srcID'], currentPage)">{{ ts('Mark non-dupe') }}</button>
           <button class="btn btn-primary btn-block" id="delay-pair" ng-disabled=isRowMerging ng-click="delayPair(mergePair['dstID'], mergePair['srcID'], currentPage)">{{ ts('Ask me Later') }}</button>
