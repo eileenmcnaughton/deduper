@@ -385,6 +385,7 @@
       $scope.duplicatePairs = [];
       $scope.isSearching = true;
       $scope.hasSuppressedPairs = false;
+      $scope.exceptedCount = 0;
       crmApi('Dedupe', 'getduplicates', {
         'rule_group_id' : $scope.ruleGroupID,
         'options': {'limit' : $scope.numberMatchesToFetch},
