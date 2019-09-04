@@ -209,26 +209,6 @@
       }
     }
 
-    function getCachedMergeInfo(contactCriteria) {
-      crmApi('Dedupe', 'getstatistics', {
-        'rule_group_id': $scope.ruleGroupID,
-        'search_limit' : $scope.limit,
-        'criteria': contactCriteria
-      }).then(function (data) {
-          var result = data.values;
-          if (result.skipped !== undefined) {
-            $scope.skippedCount = result.skipped;
-          }
-          else {
-            $scope.skippedCount = 0;
-          }
-          $scope.foundCount = parseInt(result.found);
-          // We might have just merged, or we might have reloaded earlier results.
-          $scope.hasMerged = (result['skipped'].length > 0 || result.stats.length);
-        }
-      );
-    }
-
     function getConflicts(to_keep_id, to_remove_id,contactCriteria, pair) {
       crmApi('Contact', 'get_merge_conflicts', {
         'rule_group_id': $scope.ruleGroupID,
@@ -295,14 +275,16 @@
 
     $scope.notDuplicates = function notDuplicates() {
       $scope.isMerging = true;
+      $scope.duplicatePairs = [];
       crmApi('Merge', 'mark_duplicate_exception', {
         'rule_group_id': $scope.ruleGroupID,
         'search_limit' : $scope.limit,
         'criteria': formatCriteria(),
       }).then (function(result) {
-        getCachedMergeInfo(formatCriteria());
+        $scope.foundCount = 0;
         $scope.exceptedCount = result.count;
         $scope.isMerging = false;
+        $scope.duplicatePairs = [];
       });
     };
 
@@ -381,7 +363,7 @@
       });
     };
 
-    $scope.getDuplicates = function () {
+    $scope.getDuplicates = function (is_force_reload) {
       $scope.duplicatePairs = [];
       $scope.isSearching = true;
       $scope.hasSuppressedPairs = false;
@@ -390,7 +372,8 @@
         'rule_group_id' : $scope.ruleGroupID,
         'options': {'limit' : $scope.numberMatchesToFetch},
         'search_limit' : $scope.limit,
-        'criteria' : formatCriteria()
+        'criteria' : formatCriteria(),
+        'is_force_new_search' : is_force_reload
       }).then(function (data) {
         $scope.duplicatePairs = vm.duplicatePairs = data['values'];
         $scope.hasSearched = true;
