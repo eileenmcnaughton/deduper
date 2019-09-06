@@ -10,8 +10,6 @@ See [the planning doc](docs/Planning.md) for thoughts about where I see this goi
 
 - api Merge.redo - undeletes a contact deleted by merge & re-merges - useful if contributions etc got added to the deleted contact.
 
-- colour coding - re-establishes dedupe screen colours when using shoreditch
-
 - search tasks - adds a task to search to find duplicates for selected contacts
 
 - contact task - adds an action to contact summary to find duplicates for the shown contact. We have
