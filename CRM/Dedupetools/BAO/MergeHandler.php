@@ -186,8 +186,8 @@ class CRM_Dedupetools_BAO_MergeHandler {
    */
   public function __construct($dedupeData, $mainID, $otherID, $context) {
     $this->setDedupeData($dedupeData);
-    $this->setMainID($mainID);
-    $this->setOtherID($otherID);
+    $this->setMainID((int) $mainID);
+    $this->setOtherID((int) $otherID);
     $this->setContext($context);
   }
 
@@ -219,7 +219,7 @@ class CRM_Dedupetools_BAO_MergeHandler {
    *
    * @return array of keys of conflicted fields.
    */
-  public function getFieldsInConflict() {
+  public function getFieldsInConflict():array {
     $fields = [];
     foreach (array_keys($this->dedupeData['fields_in_conflict']) as $key) {
       $fields[] = str_replace('move_', '', $key);
@@ -277,7 +277,7 @@ class CRM_Dedupetools_BAO_MergeHandler {
    * @param int $isForContactToBeKept
    * @param string $field
    *
-   * @return string
+   * @return mixed
    */
   public function getLocationBlockValue($location, $block, $isForContactToBeKept, $field) {
     return $this->getLocationBlock($location, $block, $isForContactToBeKept)[$field];
@@ -310,7 +310,10 @@ class CRM_Dedupetools_BAO_MergeHandler {
       'display',
     ];
     foreach ($otherContactEmail as $field => $value) {
-      if (!in_array($field, $keysToIgnore) && isset($mainContactEmail[$field]) && $mainContactEmail[$field] !== $value) {
+      if (
+      isset($mainContactEmail[$field])
+      && $mainContactEmail[$field] !== $value
+      && !in_array($field, $keysToIgnore, TRUE) ) {
         $this->emailConflicts[$field] = $value;
       }
     }

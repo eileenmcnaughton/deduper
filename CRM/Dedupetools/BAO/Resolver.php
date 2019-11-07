@@ -2,8 +2,9 @@
 
 use CRM_Dedupetools_ExtensionUtil as E;
 
-class CRM_Dedupetools_BAO_Resolver {
+abstract class CRM_Dedupetools_BAO_Resolver {
 
+  abstract public function resolveConflicts();
   /**
    * Object to prover merge handling.
    *
@@ -43,6 +44,8 @@ class CRM_Dedupetools_BAO_Resolver {
    * Set the given value as the value to resolve the conflict with.
    *
    * @param string $fieldName
+   * @param string $location
+   * @param string $block
    * @param mixed $value
    */
   protected function setResolvedLocationValue($fieldName, $location, $block, $value) {
