@@ -133,6 +133,70 @@ class CRM_Dedupetools_BAO_MergeHandler {
   }
 
   /**
+   * Get the fields that make up the name of an individual.
+   *
+   * @return array
+   */
+  public function getIndividualNameFields():array {
+    return ['first_name', 'last_name', 'middle_name'];
+  }
+
+  /**
+   * Get the fields that make up the name of an individual.
+   *
+   * @param bool $isForContactToBeKept
+   *   Is the value for the contact to be retained.
+   *
+   * @return array
+   */
+  public function getIndividualNameFieldValues($isForContactToBeKept):array {
+    $return = [];
+    foreach ($this->getIndividualNameFields() as $fieldName) {
+      $return[$fieldName] = $this->getValueForField($fieldName, $isForContactToBeKept);
+    }
+    return $return ;
+  }
+
+  /**
+   * Get the value for the given field.
+   *
+   * @param string $fieldName
+   * @param bool $isForContactToBeKept
+   *   Is the value for the contact to be retained.
+   *
+   * @return mixed
+   */
+  public function getValueForField($fieldName, $isForContactToBeKept) {
+    if (strpos($fieldName, 'custom_') !== 0) {
+      $contactDetail = $isForContactToBeKept ? $this->dedupeData['migration_info']['main_details'] : $this->dedupeData['migration_info']['other_details'];
+      return $contactDetail[$fieldName];
+    }
+    // You are now entering hell. The information you want is buried... somewhere.
+    if (!$isForContactToBeKept) {
+      // This is what would be 'just used' if we unset the conflict & leave 'move_custom_x' in the array
+      // so if should be safe-ish.
+      return $this->dedupeData['migration_info']['move_' . $fieldName];
+    }
+    // Honestly let's try passing back this formatted value .... because it IS deformatted at the other end.
+    // We relying on unit tests & magic here.
+    return $this->dedupeData['migration_info']['rows']['move_' . $fieldName]['main'];
+  }
+
+  /**
+   * Is there a conflict in a field used to name an individual.
+   *
+   * @return bool
+   */
+  public function hasIndividualNameFieldConflict():bool {
+    foreach ($this->getIndividualNameFields() as $nameField) {
+      if ($this->isFieldInConflict($nameField)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * @return array
    */
   public function getLocationBlocks(): array {
@@ -203,6 +267,24 @@ class CRM_Dedupetools_BAO_MergeHandler {
     // already-determined conflicts.
     $resolver = new CRM_Dedupetools_BAO_Resolver_BooleanYesResolver($this);
     $resolver->resolveConflicts();
+
+    $resolver = new CRM_Dedupetools_BAO_Resolver_UninformativeCharactersResolver($this);
+    $resolver->resolveConflicts();
+
+    $resolver = new CRM_Dedupetools_BAO_Resolver_SillyNameResolver($this);
+    $resolver->resolveConflicts();
+
+    $resolver = new CRM_Dedupetools_BAO_Resolver_MisplacedNameResolver($this);
+    $resolver->resolveConflicts();
+
+    $resolver = new CRM_Dedupetools_BAO_Resolver_InitialResolver($this);
+    $resolver->resolveConflicts();
+
+    // Let's do this one last - that way if someone wants to try to resolve names first they
+    // can & then fall back on 'just use the value from the preferred contact.
+    // @todo - should we make the resolvers sortable / re-order-able?
+    $resolver = new CRM_Dedupetools_BAO_Resolver_PreferredContactFieldResolver($this);
+    $resolver->resolveConflicts();
   }
 
   /**
@@ -228,15 +310,27 @@ class CRM_Dedupetools_BAO_MergeHandler {
   }
 
   /**
+   * Is there a conflict on the specified field.
+   *
+   * @param string $fieldName
+   *
+   * @return bool
+   */
+  public function isFieldInConflict($fieldName):bool {
+    $conflictFields = $this->getFieldsInConflict();
+    return in_array($fieldName, $conflictFields, TRUE);
+  }
+
+  /**
    * Resolve conflict on field using the specified value.
+   *
    * @param string $fieldName
    * @param mixed $value
    */
   public function setResolvedValue($fieldName, $value) {
     $moveField = 'move_' . $fieldName;
     unset($this->dedupeData['fields_in_conflict'][$moveField]);
-    $this->dedupeData['migration_info'][$moveField] = $value;
-    $this->dedupeData['rows'][$moveField]['other'] = $value;
+    $this->setValue($fieldName, $value);
   }
 
   /**
@@ -373,6 +467,64 @@ class CRM_Dedupetools_BAO_MergeHandler {
       $this->locationBlocksToDelete[$location][$block] = $this->getLocationBlockValue($location, $block, FALSE, 'id');
     }
     unset($this->dedupeData['fields_in_conflict']['move_location_' . $location . '_' . $block]);
+  }
+
+  /**
+   * Set the specified value as the one to use during merge.
+   *
+   * If by doing this the fields then match then the conflict will be marked as resolved.
+   *
+   * Otherwise this is basically just a 'working copy' of the information, which
+   * might help a later resolver reach resolution.
+   *
+   * @param string $fieldName
+   * @param mixed $value
+   * @param $isForContactToBeKept
+   */
+  public function setContactValue(string $fieldName, $value, $isForContactToBeKept) {
+    $moveField = 'move_' . $fieldName;
+    $contactField = $isForContactToBeKept ? 'main' : 'other';
+    $otherContactField = $isForContactToBeKept ? 'other' : 'main';
+    $this->dedupeData['migration_info']['rows'][$moveField][$contactField] = $value;
+    $this->dedupeData['migration_info'][$contactField . '_details'][$fieldName] = $value;
+
+    if ($value === $this->dedupeData['migration_info']['rows'][$moveField][$otherContactField]) {
+      $this->setResolvedValue($fieldName, $value);
+    }
+  }
+
+  /**
+   * Set the specified value as the one to use during merge.
+   *
+   * Note that if this resolves a conflict setResolvedValue should be used.
+   *
+   * @param string $fieldName
+   * @param mixed $value
+   */
+  public function setValue(string $fieldName, $value) {
+    $moveField = 'move_' . $fieldName;
+    $this->dedupeData['migration_info'][$moveField] = $value;
+    $this->dedupeData['migration_info']['rows'][$moveField]['other'] = $value;
+  }
+
+  /**
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
+   */
+  public function getPreferredContact() {
+    $preferredContact = new CRM_Dedupetools_BAO_PreferredContact($this->mainID, $this->otherID);
+    return $preferredContact->getPreferredContactID();
+  }
+
+  /**
+   * @param string $fieldName
+   *
+   * @return mixed
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
+   */
+  public function getPreferredContactValue($fieldName) {
+    return $this->getValueForField($fieldName, ($this->getPreferredContact() === $this->mainID));
   }
 
 }

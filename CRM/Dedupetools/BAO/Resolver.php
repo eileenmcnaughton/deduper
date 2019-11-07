@@ -41,6 +41,32 @@ abstract class CRM_Dedupetools_BAO_Resolver {
   }
 
   /**
+   * Set the specified value as the one to use during merge.
+   *
+   * Note that if this resolves a conflict then the conflict
+   * will be removed.
+   *
+   * @param string $fieldName
+   * @param mixed $value
+   * @param bool $isContactToKeep
+   */
+  protected function setContactValue($fieldName, $value, $isContactToKeep) {
+    $this->mergeHandler->setContactValue($fieldName, $value, $isContactToKeep);
+  }
+
+  /**
+   * Set the specified value as the one to use during merge.
+   *
+   * Note that if this resolves a conflict setResolvedValue should be used.
+   *
+   * @param string $fieldName
+   * @param mixed $value
+   */
+  protected function setValue($fieldName, $value) {
+    $this->mergeHandler->setValue($fieldName, $value);
+  }
+
+  /**
    * Set the given value as the value to resolve the conflict with.
    *
    * @param string $fieldName
@@ -59,8 +85,48 @@ abstract class CRM_Dedupetools_BAO_Resolver {
    *
    * @return array
    */
-  protected function getEmailConflicts($emailBlockNumber) {
+  protected function getEmailConflicts($emailBlockNumber):array {
     return $this->mergeHandler->getEmailConflicts($emailBlockNumber);
   }
 
+  /**
+   * Is there a conflict on the specified field.
+   *
+   * @param string $fieldName
+   *
+   * @return bool
+   */
+  protected function isFieldInConflict($fieldName):bool {
+    return $this->mergeHandler->isFieldInConflict($fieldName);
+  }
+
+  /**
+   * Is there a conflict in a field used to name an individual.
+   */
+  protected function hasIndividualNameFieldConflict():bool {
+    return $this->mergeHandler->hasIndividualNameFieldConflict();
+  }
+
+  /**
+   * Get the fields that make up the name of an individual.
+   *
+   * @param bool $isForContactToBeKept
+   *   Is the value for the contact to be retained.
+   *
+   * @return array
+   */
+  protected function getIndividualNameFieldValues($isForContactToBeKept): array {
+    return $this->mergeHandler->getIndividualNameFieldValues($isForContactToBeKept);
+  }
+
+  /**
+   * Get the value for the given field for the preferred conflict, using rules.
+   *
+   * @param string $fieldName
+   *
+   * @return mixed
+   */
+  protected function getPreferredContactValue($fieldName) {
+    return $this->mergeHandler->getPreferredContactValue($fieldName);
+  }
 }

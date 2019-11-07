@@ -36,4 +36,49 @@ class CRM_Dedupetools_BAO_MergeConflict extends CRM_Dedupetools_DAO_MergeConflic
 
   }
 
+  /**
+   * Get Contact fields as a name => title array.
+   *
+   * @return array
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  public static function getContactFields() {
+    $fields = civicrm_api3('Contact', 'getfields', ['action' => 'create'])['values'];
+    $generalFields = [];
+    foreach ($fields as $field) {
+      $generalFields[$field['name']] = $field['title'];
+    }
+    return $generalFields;
+  }
+
+  /**
+   * Get the criteria for determining the contact whose data should be preferred.
+   *
+   * @return array
+   */
+  public static function getPreferredContactCriteria(): array {
+    return [
+      'most_recently_created_contact' => E::ts('More recently created contact'),
+      'earliest_created_contact' => E::ts('Less recently created contact'),
+      'most_recently_modified_contact' => E::ts('More recently modified contact'),
+      'earliest_modified_contact' => E::ts('Less recently modified contact'),
+      'most_recent_contributor' => E::ts('Contact with most recent contribution.'),
+      'most_prolific_contributor' => E::ts('Contact with most contributions.'),
+    ];
+  }
+
+  /**
+   * Get the criteria for determining the contact whose data should be preferred if other methods fail.
+   *
+   * @return array
+   */
+  public static function getPreferredContactCriteriaFallback(): array {
+    return array_intersect_key(self::getPreferredContactCriteria(),
+      array_fill_keys([
+        'most_recently_created_contact',
+        'earliest_created_contact'
+      ], 1)
+    );
+  }
 }

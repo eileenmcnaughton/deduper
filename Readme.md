@@ -20,11 +20,26 @@ These fields can't be used on large databases for a group dedupe for performance
  address field in common.
 
  - merge resolvers - adds merge resolvers so some conflicts can be resolved in safe mode.
- Currently only the Yes resolverr which allows to choose yes-no fields to resolve as 'YES'  - useful
+ Current resolvers are
+  - the Yes resolver which allows to choose yes-no fields to resolve as 'YES'  - useful
  for things like is_opt_out.
  ![Resolvers](docs/images/Settings.png?raw=true "Deduper screen")
+ - The Uninformative characters resolver. This strips a range of white space and punctuation characters out
+ when comparing names. Currently the list is hard coded but I'm open to making it configurable. It also has a shorter
+ list of characters that it will strip only if that resolves the conflict. For example a '.' is stripped in the
+ uninformative characters resolver as that will mean later the initial resolver has a better chance of working.
+ By contract the "'" preferred in.
+ - The Misplaced Name resolver. This addresses the situation where it can determine the full name is in the first
+ or last name field.
+ - The Initials resolver. This addresses the situation where it can determine the Initial is in the first or
+ last name field.
+ - The silly names resolver. The ensures that a number in a name field or a known 'silly' name
+ does not block a merge (currently 'first', 'last' & 'blah').
+ - The preferred contact field resolver. This allows you set fields as being 'use whatever my preferred contact uses'.
+ Preferred contact is determined by a setting - current options are most recently created, least recently created,
+ most recently modified, least recently modified, most recent donor, most prolific donor.
 
-- merge conflicts api - does anaylsis on current conflicted merges to look for patterns.
+- merge conflicts api - does analysis on current conflicted merges to look for patterns.
 
 **Note**
 

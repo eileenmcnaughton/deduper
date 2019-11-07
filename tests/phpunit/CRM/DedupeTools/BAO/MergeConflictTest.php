@@ -51,23 +51,23 @@ class CRM_DedupeTools_BAO_MergeConflictTest extends DedupeBaseTestClass {
    * Test that a boolean field is resolved if set.
    */
   public function testResolveBooleanFields() {
-   $this->createDuplicateIndividuals([['do_not_mail' => 0], ['do_not_mail' => 1]]);
-    $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $this->ids['Contact'][0], 'to_remove_id' => $this->ids['Contact'][1]]);
-    $mergedContacts = $this->callAPISuccess('Contact', 'get', ['id' => ['IN' => $this->ids['Contact']]])['values'];
+    $this->createDuplicateIndividuals([['do_not_mail' => 0], ['do_not_mail' => 1]]);
+    $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $this->ids['contact'][0], 'to_remove_id' => $this->ids['contact'][1]]);
+    $mergedContacts = $this->callAPISuccess('Contact', 'get', ['id' => ['IN' => $this->ids['contact']]])['values'];
 
-    $this->assertEquals(1, $mergedContacts[$this->ids['Contact'][1]]['contact_is_deleted']);
-    $this->assertEquals(0, $mergedContacts[$this->ids['Contact'][0]]['contact_is_deleted']);
-    $this->assertEquals(1, $mergedContacts[$this->ids['Contact'][0]]['do_not_mail']);
+    $this->assertEquals(1, $mergedContacts[$this->ids['contact'][1]]['contact_is_deleted']);
+    $this->assertEquals(0, $mergedContacts[$this->ids['contact'][0]]['contact_is_deleted']);
+    $this->assertEquals(1, $mergedContacts[$this->ids['contact'][0]]['do_not_mail']);
 
     // Now try merging a contact with 0 in that field into our retained contact.
-    $this->ids['Contact'][2] = $this->callAPISuccess('Contact', 'create', ['first_name' => 'bob', 'do_not_mail' => 0, 'contact_type' => 'Individual'])['id'];
-    $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $this->ids['Contact'][0], 'to_remove_id' => $this->ids['Contact'][2]]);
-    $mergedContacts = $this->callAPISuccess('Contact', 'get', ['id' => ['IN' => $this->ids['Contact'], 'is_deleted' => 0]])['values'];
+    $this->ids['contact'][2] = $this->callAPISuccess('Contact', 'create', ['first_name' => 'bob', 'do_not_mail' => 0, 'contact_type' => 'Individual'])['id'];
+    $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $this->ids['contact'][0], 'to_remove_id' => $this->ids['contact'][2]]);
+    $mergedContacts = $this->callAPISuccess('Contact', 'get', ['id' => ['IN' => $this->ids['contact'], 'is_deleted' => 0]])['values'];
 
-    $this->assertEquals(1, $mergedContacts[$this->ids['Contact'][0]]['do_not_mail']);
+    $this->assertEquals(1, $mergedContacts[$this->ids['contact'][0]]['do_not_mail']);
 
-    $this->assertEquals(1, $mergedContacts[$this->ids['Contact'][2]]['contact_is_deleted']);
-    $this->assertEquals(0, $mergedContacts[$this->ids['Contact'][0]]['contact_is_deleted']);
+    $this->assertEquals(1, $mergedContacts[$this->ids['contact'][2]]['contact_is_deleted']);
+    $this->assertEquals(0, $mergedContacts[$this->ids['contact'][0]]['contact_is_deleted']);
   }
 
   /**
@@ -82,15 +82,15 @@ class CRM_DedupeTools_BAO_MergeConflictTest extends DedupeBaseTestClass {
    */
   public function testResolveEmailOnHold($isReverse) {
     $this->createDuplicateIndividuals();
-    // Conveniently our 2 contacts are 0 & 1 in the $this->ids['Contact'] array so we can abuse the boolean var like this.
+    // Conveniently our 2 contacts are 0 & 1 in the $this->ids['contact'] array so we can abuse the boolean var like this.
     $contactIDOnHold = $isReverse;
 
-    $email1 = $this->callAPISuccess('Email', 'get', ['contact_id' => $this->ids['Contact'][$contactIDOnHold]])['id'];
+    $email1 = $this->callAPISuccess('Email', 'get', ['contact_id' => $this->ids['contact'][$contactIDOnHold]])['id'];
     $this->callAPISuccess('Email', 'create', ['id' => $email1, 'on_hold' => 1]);
 
-    $mergeResult = $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $this->ids['Contact'][0], 'to_remove_id' => $this->ids['Contact'][1]])['values'];
+    $mergeResult = $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $this->ids['contact'][0], 'to_remove_id' => $this->ids['contact'][1]])['values'];
     $this->assertCount(1, $mergeResult['merged']);
-    $email0 = $this->callAPISuccessGetSingle('Email', ['contact_id' => ['IN' => [$this->ids['Contact'][0]]]]);
+    $email0 = $this->callAPISuccessGetSingle('Email', ['contact_id' => ['IN' => [$this->ids['contact'][0]]]]);
     $this->assertEquals(1, $email0['on_hold']);
   }
 
@@ -104,21 +104,337 @@ class CRM_DedupeTools_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
+   * Test resolving an initial in the first name.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testInitialResolution($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'Bob M'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('M', $mergedContact['middle_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testInitialResolutionInLast($isReverse) {
+    $this->createDuplicateIndividuals([['last_name' => 'M Smith'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('M', $mergedContact['middle_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testInitialResolutionNameIsInitial($isReverse) {
+    $this->createDuplicateIndividuals([['last_name' => 'S', 'first_name' => 'B'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name when the other contact already has the same value as an initial
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testInitialResolutionNameInitialExists($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'Bob J'], ['middle_name' => 'J']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+    $this->assertEquals('J', $mergedContact['middle_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name when the other contact already has the same value as an initial with a dot.
+   *
+   * ie. [first_name => 'Bob J'] vs ['first_name' => 'Bob', 'middle_name' => 'J.']
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testInitialResolutionNameInitialExistsDotted($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'Bob J.'], ['middle_name' => 'J.']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+    $this->assertEquals('J', $mergedContact['middle_name']);
+  }
+
+  /**
+   * Test that we don't allow silly names to create a conflict.
+   *
+   * Sometimes people enter cruft like 'first' for first_name. Later they
+   * enter their real names. We can ignore known silly names when resolving conflicts.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testIgnoreSillyNames($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'first'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+  }
+
+  /**
+   *  Test resolving a situation where the first name is duplicated in the full name.
+   *
+   * e.g
+   * ['first_name' => 'Bob', 'last_name' => 'Bob Max Smith'],
+   * ['first_name' => 'Bob', 'last_name' => 'Max Smith']
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testMisplacedNameResolutionFullNameInFirstName($isReverse) {
+    $this->createDuplicateIndividuals([['last_name' => 'null', 'first_name' => 'Bob M Smith'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+    $this->assertEquals('M', $mergedContact['middle_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testMisplacedNameResolutionFullNameInLastName($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'null', 'last_name' => 'Bob M Smith'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+    $this->assertEquals('M', $mergedContact['middle_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testMisplacedNameResolutionFullRepeatedInLastName($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'Bob', 'last_name' => 'Bob Max Smith'], ['last_name' => 'Max Smith']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Max Smith', $mergedContact['last_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name with punctuation.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testMisplacedNameResolutionWithPunctuation($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'null', 'last_name' => 'Bob M. Smith'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+    $this->assertEquals('M', $mergedContact['middle_name']);
+  }
+
+  /**
+   * Test that a name field that is the same apart from white space can be resolved.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testResolveWhiteSpaceInName($isReverse) {
+    $this->createDuplicateIndividuals([['first_name' => 'alter ego'], ['first_name' => 'alterego']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('alter ego', $mergedContact['first_name']);
+  }
+
+  /**
+   * Test resolving a field where we resolve by preferred contact.
+   *
+   * Use earliest created contact resolver.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testResolvePreferredContactField($isReverse) {
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_field_prefer_preferred_contact' => ['contact_source']]);
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_preferred_contact_resolution' => ['earliest_created_contact']]);
+    $this->createDuplicateIndividuals([['contact_source' => 'keep me'], ['contact_source' => 'ditch me']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('keep me', $this->callAPISuccessGetValue('Contact', ['return' => 'contact_source', 'id' => $mergedContact['id']]));
+  }
+
+  /**
+   * Test resolving a field where we resolve by preferred contact.
+   *
+   * Use most recently created contact resolver.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testResolvePreferredContactFieldChooseLatest($isReverse) {
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_field_prefer_preferred_contact' => ['contact_source']]);
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_preferred_contact_resolution' => ['most_recently_created_contact']]);
+    $this->createDuplicateIndividuals([['contact_source' => 'ditch me'], ['contact_source' => 'keep me']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('keep me', $this->callAPISuccessGetValue('Contact', ['return' => 'contact_source', 'id' => $mergedContact['id']]));
+  }
+
+  /**
+ * Test resolving a field where we resolve by preferred contact.
+ *
+ * Use most recent donor resolver.
+ *
+ * @param bool $isReverse
+ *   Should we reverse which contact we merge into.
+ *
+ * @dataProvider booleanDataProvider
+ *
+ * @throws \CRM_Core_Exception
+ */
+  public function testResolvePreferredContactFieldChooseMostRecentDonor($isReverse) {
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_field_prefer_preferred_contact' => ['contact_source']]);
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_preferred_contact_resolution' => ['most_recent_contributor']]);
+    $this->createDuplicateDonors();
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('keep me', $this->callAPISuccessGetValue('Contact', ['return' => 'contact_source', 'id' => $mergedContact['id']]));
+  }
+
+  /**
+   * Test resolving a field where we resolve by preferred contact.
+   *
+   * Use most prolific donor contact resolver.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testResolvePreferredContactFieldChooseMostProlific($isReverse) {
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_field_prefer_preferred_contact' => ['contact_source']]);
+    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_preferred_contact_resolution' => ['most_prolific_contributor']]);
+    $this->createDuplicateDonors();
+    // Add a second contribution to the first donor - making it more prolific.
+    $this->callAPISuccess('Contribution', 'create', ['financial_type_id' => 'Donation', 'total_amount' => 5, 'contact_id' => $this->ids['contact'][0], 'receive_date' => '2019-08-08']);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('keep me', $this->callAPISuccessGetValue('Contact', ['return' => 'contact_source', 'id' => $mergedContact['id']]));
+  }
+
+  /**
    * Create individuals to dedupe.
    *
    * @param array $contactParams
-   *   Arrays of parameters.
+   *   Arrays of parameters, one per contact.
    */
   private function createDuplicateIndividuals($contactParams = [[], []]) {
     $params = [
-      'first_name' => 'bob',
+      'first_name' => 'Bob',
       'last_name' => 'Smith',
       'contact_type' => 'Individual',
       'email' => 'bob@example.com',
     ];
     foreach ($contactParams as $index => $contactParam) {
       $contactParam = array_merge($params, $contactParam);
-      $this->ids['Contact'][$index] = $this->callAPISuccess('Contact', 'create', $contactParam)['id'];
+      $this->ids['contact'][$index] = $this->callAPISuccess('Contact', 'create', $contactParam)['id'];
+    }
+  }
+
+  /**
+   * Action the merge of the 2 created contacts.
+   *
+   * @param bool $isReverse
+   *   Is the order to be reversed - ie. merge contact 0 into 1 rather than 1 into 0.
+   *   It is good practice to do all dedupe tests twice using this reversal to cover
+   *   both scenarios.
+   *
+   * @return array|int
+   * @throws \CRM_Core_Exception
+   */
+  protected function doMerge($isReverse) {
+    $toKeepContactID = $isReverse ? $this->ids['contact'][1] : $this->ids['contact'][0];
+    $toDeleteContactID = $isReverse ? $this->ids['contact'][0] : $this->ids['contact'][1];
+    $mergeResult = $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $toKeepContactID, 'to_remove_id' => $toDeleteContactID])['values'];
+    $this->assertCount(1, $mergeResult['merged']);
+    $mergedContact = $this->callAPISuccessGetSingle('Contact', ['id' => $toKeepContactID]);
+    return $mergedContact;
+  }
+
+  /**
+   * Create 2 donor contacts, differing in their source value.
+   *
+   * The first donor ($this->ids['contact'][0] is the more recent donor.
+   */
+  protected function createDuplicateDonors() {
+    $this->createDuplicateIndividuals([['contact_source' => 'keep me'], ['contact_source' => 'ditch me']]);
+    $receiveDate = '2017-08-09';
+    foreach ($this->ids['contact'] as $contactID) {
+      $this->callAPISuccess('Contribution', 'create', ['financial_type_id' => 'Donation', 'total_amount' => 5, 'contact_id' => $contactID, 'receive_date' => $receiveDate]);
+      $receiveDate = '2016-08-09';
     }
   }
 
