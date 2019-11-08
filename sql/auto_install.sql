@@ -85,12 +85,12 @@ CREATE TABLE `civicrm_contact_name_pair` (
      `name_a` varchar(128)    COMMENT 'First name (this is the master, if that matters)',
      `name_b` varchar(128)    COMMENT 'Second name (if one name is a nickname or a mis-spelling it will be this one)',
      `is_name_b_nickname` tinyint   DEFAULT 0 ,
-     `is_name_b_misspelling` tinyint   DEFAULT 0,
+     `is_name_b_inferior` tinyint   DEFAULT 0,
   PRIMARY KEY (`id`),
      INDEX `name_a`(name_a),
      INDEX `name_b`(name_b),
      INDEX `is_name_b_nickname`(is_name_b_nickname),
-     INDEX `is_name_b_misspelling`(is_name_b_misspelling)
+     INDEX `is_name_b_inferior`(is_name_b_inferior)
   );
 
 -- /*******************************************************

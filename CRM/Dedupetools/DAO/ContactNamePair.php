@@ -57,7 +57,7 @@ class CRM_Dedupetools_DAO_ContactNamePair extends CRM_Core_DAO {
   /**
    * @var bool
    */
-  public $is_name_b_misspelling;
+  public $is_name_b_inferior;
 
   /**
    * Class constructor.
@@ -132,11 +132,11 @@ class CRM_Dedupetools_DAO_ContactNamePair extends CRM_Core_DAO {
             'type' => 'CheckBox',
           ],
         ],
-        'is_name_b_misspelling' => [
-          'name' => 'is_name_b_misspelling',
+        'is_name_b_inferior' => [
+          'name' => 'is_name_b_inferior',
           'type' => CRM_Utils_Type::T_BOOLEAN,
-          'title' => CRM_Dedupetools_ExtensionUtil::ts('Is Name B a Misspelling of Name A?'),
-          'where' => 'civicrm_contact_name_pair.is_name_b_misspelling',
+          'title' => CRM_Dedupetools_ExtensionUtil::ts('Is Name B Inferior to Name A?'),
+          'where' => 'civicrm_contact_name_pair.is_name_b_inferior',
           'default' => '0',
           'table_name' => 'civicrm_contact_name_pair',
           'entity' => 'ContactNamePair',
@@ -240,13 +240,13 @@ class CRM_Dedupetools_DAO_ContactNamePair extends CRM_Core_DAO {
         'localizable' => FALSE,
         'sig' => 'civicrm_contact_name_pair::0::is_name_b_nickname',
       ],
-      'is_name_b_misspelling' => [
-        'name' => 'is_name_b_misspelling',
+      'is_name_b_inferior' => [
+        'name' => 'is_name_b_minferior',
         'field' => [
-          0 => 'is_name_b_misspelling',
+          0 => 'is_name_b_inferior',
         ],
         'localizable' => FALSE,
-        'sig' => 'civicrm_contact_name_pair::0::is_name_b_misspelling',
+        'sig' => 'civicrm_contact_name_pair::0::is_name_b_inferior',
       ],
     ];
     return ($localize && !empty($indices)) ? CRM_Core_DAO_AllCoreTables::multilingualize(__CLASS__, $indices) : $indices;

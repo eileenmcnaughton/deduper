@@ -53,8 +53,9 @@
   </field>
 
   <field>
-    <name>is_name_b_misspelling</name>
-    <title>Is Name B a Misspelling of Name A?</title>
+    <name>is_name_b_inferior</name>
+    <description>Is Name B a misspelling or otherwise less preferred variant</description>
+    <title>Is Name B Inferior to Name A?</title>
     <type>boolean</type>
     <default>0</default>
     <html>
@@ -74,7 +75,7 @@
     <fieldName>is_name_b_nickname</fieldName>
   </index>
   <index>
-    <name>is_name_b_misspelling</name>
-    <fieldName>is_name_b_misspelling</fieldName>
+    <name>is_name_b_inferior</name>
+    <fieldName>is_name_b_inferior</fieldName>
   </index>
 </table>
