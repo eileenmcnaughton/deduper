@@ -1,10 +1,11 @@
-name_a,name_b,is_name_b_nickname,is_name_b_misspelling,
-Benjamin,Benjamain,0,1,
+name_a,name_b,is_name_b_nickname,is_name_b_misspelling
+Benjamin,Benjamain,0,1
 Richard,Rchard,0,1
 Anthony,Tony,1,0
 Bradford,Brad,1,0
 Christopher,Chris,1,0
 Constance,Connie,1,0
+Elijah,Eli,1,0
 Geoffrey,Geoff,1,0
 Gregory,Greg,1,0
 James,Jim,1,0

@@ -1,19 +1,19 @@
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
+-- | CiviCRM version 5       |
 -- +--------------------------------------------------------------------+
 -- | Copyright CiviCRM LLC (c) 2004-2020                                |
 -- +--------------------------------------------------------------------+
 -- | This file is a part of CiviCRM.                                    |
--- |                                                                    |
+-- |                         |
 -- | CiviCRM is free software; you can copy, modify, and distribute it  |
 -- | under the terms of the GNU Affero General Public License           |
 -- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
+-- |                         |
 -- | CiviCRM is distributed in the hope that it will be useful, but     |
 -- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
 -- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
 -- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
+-- |                         |
 -- | You should have received a copy of the GNU Affero General Public   |
 -- | License and the CiviCRM Licensing Exception along                  |
 -- | with this program; if not, contact CiviCRM LLC                     |
@@ -28,21 +28,21 @@
 
 
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
+-- | CiviCRM version 5       |
 -- +--------------------------------------------------------------------+
 -- | Copyright CiviCRM LLC (c) 2004-2020                                |
 -- +--------------------------------------------------------------------+
 -- | This file is a part of CiviCRM.                                    |
--- |                                                                    |
+-- |                         |
 -- | CiviCRM is free software; you can copy, modify, and distribute it  |
 -- | under the terms of the GNU Affero General Public License           |
 -- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
+-- |                         |
 -- | CiviCRM is distributed in the hope that it will be useful, but     |
 -- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
 -- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
 -- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
+-- |                         |
 -- | You should have received a copy of the GNU Affero General Public   |
 -- | License and the CiviCRM Licensing Exception along                  |
 -- | with this program; if not, contact CiviCRM LLC                     |
@@ -86,7 +86,7 @@ CREATE TABLE `civicrm_contact_name_pair` (
      `name_b` varchar(128)    COMMENT 'Second name (if one name is a nickname or a mis-spelling it will be this one)',
      `is_name_b_nickname` tinyint   DEFAULT 0 ,
      `is_name_b_misspelling` tinyint   DEFAULT 0,
-     PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`),
      INDEX `name_a`(name_a),
      INDEX `name_b`(name_b),
      INDEX `is_name_b_nickname`(is_name_b_nickname),

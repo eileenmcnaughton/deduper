@@ -1,5 +1,6 @@
 <?php
 use CRM_Dedupetools_ExtensionUtil as E;
+use League\Csv\Reader;
 
 /**
  * Collection of upgrade steps.
@@ -60,14 +61,49 @@ class CRM_Dedupetools_Upgrader extends CRM_Dedupetools_Upgrader_Base {
    *
    * @return TRUE on success
    * @throws Exception
-   *
+   */
   public function upgrade_4200() {
     $this->ctx->log->info('Applying update 4200');
-    CRM_Core_DAO::executeQuery('UPDATE foo SET bar = "whiz"');
-    CRM_Core_DAO::executeQuery('DELETE FROM bang WHERE willy = wonka(2)');
-    return TRUE;
-  } // */
+    CRM_Core_DAO::executeQuery("
+CREATE TABLE IF NOT EXISTS `civicrm_contact_name_pair` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `name_a` varchar(255) NOT NULL DEFAULT '',
+  `name_b` varchar(255) NOT NULL DEFAULT '',
+  `is_name_b_nickname` tinyint(10) NOT NULL DEFAULT '0',
+  `is_name_b_misspelling` tinyint(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `name_a` (`name_a`),
+  KEY `name_b` (`name_b`),
+  KEY `is_name_b_nickname` (`is_name_b_nickname`),
+  KEY `is_name_b_misspelling` (`is_name_b_misspelling`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+");
+
+    $this->prePopulateNameMatchTable();
+    return TRUE;
+  }
+
+  /**
+   * Pre-populate name match table with common mis-spellings & alternatives.
+   */
+  public function prePopulateNameMatchTable() {
+    $reader = Reader::createFromPath(__DIR__ . '/name_matches.csv', 'r');
+    $reader->setHeaderOffset(0);
+    foreach ($reader as $row) {
+      CRM_Core_DAO::executeQuery(
+        'INSERT INTO civicrm_contact_name_pairs
+        (name_a, name_b, is_name_b_nickname, is_name_b_misspelling)
+         VALUES (%1, %2, %3, %3)
+      ', [
+        1 => [$row['name_a'], 'String'],
+        2 => [$row['name_b'], 'String'],
+        3 => [$row['is_name_b_nickname'], 'Integer'],
+        4 => [$row['is_name_b_misspelling'], 'Integer'],
+      ]);
+    }
+
+  }
 
   /**
    * Example: Run an external SQL script.
