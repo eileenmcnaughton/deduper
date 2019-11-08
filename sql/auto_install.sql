@@ -81,30 +81,17 @@ SET FOREIGN_KEY_CHECKS=1;
 -- *******************************************************/
 CREATE TABLE `civicrm_contact_name_pair` (
 
-
      `id` int unsigned NOT NULL AUTO_INCREMENT  COMMENT 'Unique ContactNamePair ID',
      `name_a` varchar(128)    COMMENT 'First name (this is the master, if that matters)',
      `name_b` varchar(128)    COMMENT 'Second name (if one name is a nickname or a mis-spelling it will be this one)',
      `is_name_b_nickname` tinyint   DEFAULT 0 ,
-     `is_name_b_misspelling` tinyint   DEFAULT 0  
-,
-        PRIMARY KEY (`id`)
- 
-    ,     INDEX `name_a`(
-        name_a
-  )
-  ,     INDEX `name_b`(
-        name_b
-  )
-  ,     INDEX `is_name_b_nickname`(
-        is_name_b_nickname
-  )
-  ,     INDEX `is_name_b_misspelling`(
-        is_name_b_misspelling
-  )
-  
- 
-)    ;
+     `is_name_b_misspelling` tinyint   DEFAULT 0,
+     PRIMARY KEY (`id`),
+     INDEX `name_a`(name_a),
+     INDEX `name_b`(name_b),
+     INDEX `is_name_b_nickname`(is_name_b_nickname),
+     INDEX `is_name_b_misspelling`(is_name_b_misspelling)
+  );
 
 -- /*******************************************************
 -- *
@@ -115,20 +102,15 @@ CREATE TABLE `civicrm_contact_name_pair` (
 -- *******************************************************/
 CREATE TABLE `civicrm_mergeconflict` (
 
-
      `id` int unsigned NOT NULL AUTO_INCREMENT  COMMENT 'Unique MergeConflict ID',
      `contact_1` int unsigned    COMMENT 'FK to Contact',
      `contact_2` int unsigned    COMMENT 'FK to Contact',
      `group_id` int unsigned    COMMENT 'FK to Group',
-     `conflicted_field` varchar(0)    ,
-     `value_1` varchar(0)    ,
-     `value_2` varchar(0)    ,
-     `analysis` varchar(0)     
-,
-        PRIMARY KEY (`id`)
- 
- 
- 
-)    ;
+     `conflicted_field` varchar(0),
+     `value_1` varchar(0),
+     `value_2` varchar(0),
+     `analysis` varchar(0),
+     PRIMARY KEY (`id`)
+     );
 
- 
+
