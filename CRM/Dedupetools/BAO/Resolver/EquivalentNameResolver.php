@@ -182,7 +182,11 @@ class CRM_Dedupetools_BAO_Resolver_EquivalentNameResolver extends CRM_Dedupetool
    * @return bool
    */
   protected function hasAlternatives($value): bool {
-    return !empty($this->alternatives[$value]['alternative_of']);
+    if (empty($this->alternatives[$value]['alternative_of'])) {
+      return FALSE;
+    }
+    $viableAlternatives = array_intersect_key($this->alternatives, array_fill_keys($this->alternatives[$value]['alternative_of'], 1));
+    return !empty($viableAlternatives);
   }
 
   /**

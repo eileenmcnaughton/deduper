@@ -38,7 +38,7 @@ class CRM_Dedupetools_BAO_Resolver_SillyNameResolver extends CRM_Dedupetools_BAO
       return TRUE;
     }
     $knownSillyNames = ['first', 'last', 'blah', 'none'];
-    if (in_array(strtolower($value), $knownSillyNames, TRUE)) {
+    if (in_array(strtolower(trim($value)), $knownSillyNames, TRUE)) {
       return TRUE;
     }
   }
