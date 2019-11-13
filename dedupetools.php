@@ -108,7 +108,7 @@ function dedupetools_civicrm_caseTypes(&$caseTypes) {
  * Note: This hook only runs in CiviCRM 4.5+. It may
  * use features only available in v4.6+.
  *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_angularModules
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_angularModules
  */
 function dedupetools_civicrm_angularModules(&$angularModules) {
   _dedupetools_civix_civicrm_angularModules($angularModules);
@@ -127,7 +127,7 @@ function dedupetools_civicrm_angularModules(&$angularModules) {
 /**
  * Implements hook_civicrm_alterSettingsFolders().
  *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_alterSettingsFolders
  */
 function dedupetools_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _dedupetools_civix_civicrm_alterSettingsFolders($metaDataFolders);
@@ -135,6 +135,8 @@ function dedupetools_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
 
 /**
  * Add dedupe searches to actions available.
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_summaryActions
  *
  * @param array $actions
  * @param int $contactID
@@ -177,6 +179,8 @@ function dedupetools_civicrm_summaryActions(&$actions, $contactID) {
 /**
  * Keep merge conflict analysis out of log tables. It is temporary data.
  *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_alterLogTables
+ *
  * @param array $logTableSpec
  */
 function dedupetools_civicrm_alterLogTables(&$logTableSpec) {
@@ -186,6 +190,8 @@ function dedupetools_civicrm_alterLogTables(&$logTableSpec) {
 /**
  * This hook is called to display the list of actions allowed after doing a search,
  * allowing you to inject additional actions or to remove existing actions.
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_searchTasks
  *
  * @param string $objectType
  * @param array $tasks
@@ -204,7 +210,7 @@ function dedupetools_civicrm_searchTasks($objectType, &$tasks) {
 /**
  * Implements hook_civicrm_preProcess().
  *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_preProcess
  */
 function dedupetools_civicrm_preProcess($formName, &$form) {
   if ($formName === 'CRM_Contact_Form_Merge') {
@@ -224,7 +230,7 @@ function dedupetools_civicrm_preProcess($formName, &$form) {
 /**
  * Implements hook_civicrm_navigationMenu().
  *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_navigationMenu
  */
 function dedupetools_civicrm_navigationMenu(&$menu) {
   _dedupetools_civix_insert_navigation_menu($menu, 'Contacts', [
@@ -249,6 +255,8 @@ function dedupetools_civicrm_navigationMenu(&$menu) {
 
 /**
  * Do not require administer CiviCRM to use deduper.
+ *
+ *  @link https://docs.civicrm.org/dev/en/latest/hooks/hook_alterAPIPermissions
  *
  * @param string $entity
  * @param string $action
@@ -275,6 +283,8 @@ function dedupetools_civicrm_alterAPIPermissions($entity, $action, &$params, &$p
 
 /**
  * Implementation of hook_civicrm_merge().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_merge
  *
  * @param string $type
  * @param array $refs
@@ -306,6 +316,8 @@ function dedupetools_civicrm_merge($type, &$refs, $mainId, $otherId, $tables) {
 /**
  * Alter location data 'planned' for merge.
  *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_alterLocationMergeData
+ *
  * @param array $blocksDAO
  *   Array of location DAO to be saved. These are arrays in 2 keys 'update' &
  *   'delete'.
@@ -330,6 +342,8 @@ function dedupetools_civicrm_alterLocationMergeData(&$blocksDAO, $mainId, $other
 
 /**
  * Set up a cache for saving dedupe pairs in.
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_container
  *
  * We want to be able to save dedupe name match info into an efficient cache - this equates to
  * caching in php for the duration of a process & Redis / MemCache (if available) for longer.
@@ -362,8 +376,17 @@ function dedupetools_civicrm_container($container) {
  *
  * Declare entity types provided by this module.
  *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_entityTypes
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
  */
 function dedupetools_civicrm_entityTypes(&$entityTypes) {
   _dedupetools_civix_civicrm_entityTypes($entityTypes);
+}
+
+/**
+ * Implements hook_civicrm_themes().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_themes
+ */
+function dedupetools_civicrm_themes(&$themes) {
+  _dedupetools_civix_civicrm_themes($themes);
 }
