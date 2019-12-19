@@ -43,11 +43,16 @@ class CRM_Dedupetools_BAO_MergeConflict extends CRM_Dedupetools_DAO_MergeConflic
    *
    * @throws \CiviCRM_API3_Exception
    */
-  public static function getContactFields() {
-    $fields = civicrm_api3('Contact', 'getfields', ['action' => 'create'])['values'];
+  public static function getContactFields(): array {
+    $fields = civicrm_api3('Contact', 'getfields', ['action' => 'get'])['values'];
     $generalFields = [];
-    foreach ($fields as $field) {
-      $generalFields[$field['name']] = $field['title'];
+    foreach ($fields as $key => $field) {
+      if ((isset($field['entity']) && $field['entity'] === 'Contact')
+      || !empty($field['extends'])) {
+        // Only add genuine contact & contact custom fields - not stuff like 'street address'
+        // that getfields retrieves.
+        $generalFields[$key] = $field['title'];
+      }
     }
     return $generalFields;
   }

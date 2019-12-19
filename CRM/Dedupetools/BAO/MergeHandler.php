@@ -183,7 +183,7 @@ class CRM_Dedupetools_BAO_MergeHandler {
    * @return array
    */
   public function getIndividualNameFields():array {
-    return ['first_name', 'last_name', 'middle_name'];
+    return ['first_name', 'last_name', 'middle_name', 'nick_name'];
   }
 
   /**

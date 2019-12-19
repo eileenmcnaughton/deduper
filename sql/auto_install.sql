@@ -82,8 +82,8 @@ SET FOREIGN_KEY_CHECKS=1;
 CREATE TABLE `civicrm_contact_name_pair` (
 
      `id` int unsigned NOT NULL AUTO_INCREMENT  COMMENT 'Unique ContactNamePair ID',
-     `name_a` varchar(128)    COMMENT 'First name (this is the master, if that matters)',
-     `name_b` varchar(128)    COMMENT 'Second name (if one name is a nickname or a mis-spelling it will be this one)',
+     `name_a` varchar(64)    COMMENT 'First name (this is the master, if that matters)',
+     `name_b` varchar(64)    COMMENT 'Second name (if one name is a nickname or a mis-spelling it will be this one)',
      `is_name_b_nickname` tinyint   DEFAULT 0 ,
      `is_name_b_inferior` tinyint   DEFAULT 0,
   PRIMARY KEY (`id`),

@@ -22,7 +22,7 @@
     <name>name_a</name>
     <title>Name A</title>
     <type>varchar</type>
-    <length>128</length>
+    <length>64</length>
     <html>
       <type>Text</type>
       <size>30</size>
@@ -34,7 +34,7 @@
     <name>name_b</name>
     <title>Name B</title>
     <type>varchar</type>
-    <length>128</length>
+    <length>64</length>
     <html>
       <type>Text</type>
       <size>30</size>

@@ -61,36 +61,20 @@ class CRM_Dedupetools_BAO_Resolver_EquivalentNameResolver extends CRM_Dedupetool
     }
     $this->interpretSetting();
 
-    foreach ([TRUE, FALSE] as $isContactToKeep) {
-      $contact1 = $this->getIndividualNameFieldValues($isContactToKeep);
+    $contact1 = $this->getIndividualNameFieldValues(TRUE);
+    $contact2 = $this->getIndividualNameFieldValues(FALSE);
 
-      foreach ($contact1 as $fieldName => $value) {
-        if ($this->isFieldInConflict($fieldName)) {
+    if ($this->isFieldInConflict('first_name')) {
+      $contact1FirstName = $contact1['first_name'];
+      $contact2FirstName = $contact2['first_name'];
 
-          $otherContactValue = $this->getIndividualNameFieldValues(!$isContactToKeep)[$fieldName];
-          $this->loadAlternatives($value);
-          $this->loadAlternatives($otherContactValue);
-
-          if ($this->isInferior($value)) {
-            $this->resolveInferiorValue($value, $fieldName, $isContactToKeep, $otherContactValue);
-          }
-          if ( $this->nameHandlingSetting  && $this->hasAlternatives($value)) {
-            if ($this->isNickNameOf($value, $otherContactValue)) {
-              if ($this->isKeepNickName) {
-                $this->setContactValue('nick_name', $value, $isContactToKeep);
-              }
-              if ($this->isPreferNickName) {
-                $this->setResolvedValue($fieldName, $value);
-              }
-              if ($this->isPreferOtherName) {
-                $this->setResolvedValue($fieldName, $otherContactValue);
-              }
-            }
-            if ($this->isResolveByPreferredContact) {
-              $this->setResolvedValue($fieldName, $this->getPreferredContactValue($fieldName));
-            }
-          }
-        }
+      $this->loadAlternatives($contact1FirstName);
+      $this->loadAlternatives($contact2FirstName);
+      $hasNickName = !empty($contact1['nick_name']) || !empty($contact2['nick_name']);
+      $this->resolveNamesForPair($contact1FirstName, $contact2FirstName, TRUE, $hasNickName );
+      $this->resolveNamesForPair($contact2FirstName, $contact1FirstName, FALSE, $hasNickName);
+      if ($this->isResolveEquivalentNamesOnPreferredContact($contact1FirstName, $contact2FirstName)) {
+        $this->setResolvedValue('first_name', $this->getPreferredContactValue('first_name'));
       }
     }
   }
@@ -108,13 +92,8 @@ class CRM_Dedupetools_BAO_Resolver_EquivalentNameResolver extends CRM_Dedupetool
       return;
     }
     if (!\Civi::cache('dedupe_pairs')->has('name_alternatives_' . $value)) {
-      // There is something funky about including api v4 at the moment.
-      // It's in core in 5.19 & I figure if it's still playing up for us once we
-      // are on that I'll dig further.
-      require_once(__DIR__ . '/../../../../Civi/Api4/ContactNamePair.php');
       $namePair = \Civi\Api4\ContactNamePair::get()
-        ->addWhere('name_b', '=', $value)
-        ->addClause('OR', ['name_b', '=', $value], ['name_b', '=', $value])
+        ->addClause('OR', ['name_a', '=', $value], ['name_b', '=', $value])
         ->setCheckPermissions(FALSE)
         ->execute();
       $alternatives = ['inferior_version_of' => [], 'nick_name_of' => []];
@@ -190,6 +169,40 @@ class CRM_Dedupetools_BAO_Resolver_EquivalentNameResolver extends CRM_Dedupetool
   }
 
   /**
+   * Do the 2 contacts have equivalent names.
+   *
+   * Equivalent names are interchangeable with no specified preference.
+   *
+   * (ie. a specified preference would be when one is a inferior, like a misspelling).
+   *
+   * @param string $name1
+   * @param string $name2
+   *
+   * @return bool
+   */
+  protected function isResolveEquivalentNamesOnPreferredContact($name1, $name2) {
+    if (!$this->isResolveByPreferredContact) {
+      // This is kind of short hand. We don't currently permit a combination of
+      // prefer nick name but fall back on preferred contact. Preferred contact 'stands alone'
+      // so we can filter by it. It's conceivable we would add prefer_non_nick_name_then_prefer_preferred_contact
+      // and we'd need to do more work here but for now.
+      return FALSE;
+    }
+    if ($this->isInferior($name1)) {
+      return FALSE;
+    }
+    if ($this->isInferior($name2)) {
+      return FALSE;
+    }
+    if (!empty($this->hasAlternatives($name1))) {
+      return TRUE;
+    }
+    if (!empty($this->hasAlternatives($name2))) {
+      return TRUE;
+    }
+  }
+
+  /**
    * Is the given value the nickname of the other contact's name
    *
    * @param string $value
@@ -220,6 +233,40 @@ class CRM_Dedupetools_BAO_Resolver_EquivalentNameResolver extends CRM_Dedupetool
     }
     if (in_array($this->nameHandlingSetting, ['prefer_preferred_contact_value', 'prefer_preferred_contact_value_keep_nick_name'], TRUE)) {
       $this->isResolveByPreferredContact = TRUE;
+    }
+  }
+
+  /**
+   * Resolve names for the given pair if they are equivalent names.
+   *
+   * @param string $name
+   * @param string $otherName
+   * @param bool $isContactToKeep
+   * @param bool $hasNickName
+   * @param string $fieldName
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
+   */
+  protected function resolveNamesForPair($name, $otherName, $isContactToKeep, $hasNickName, $fieldName = 'first_name') {
+    if ($this->isInferior($name)) {
+      $this->resolveInferiorValue($name, 'first_name', $isContactToKeep, $otherName);
+    }
+
+    if ($this->nameHandlingSetting && $this->hasAlternatives($name)) {
+      if (!$hasNickName && $this->isNickNameOf($name, $otherName)) {
+        if ($this->isKeepNickName) {
+          // Always set for the contact Not to keep to force it to be saved since it is on
+          // neither contact at the moment.
+          $this->setContactValue('nick_name', $name, FALSE);
+        }
+        if ($this->isPreferNickName) {
+          $this->setResolvedValue($fieldName, $name);
+        }
+        if ($this->isPreferOtherName) {
+          $this->setResolvedValue($fieldName, $otherName);
+        }
+      }
     }
   }
 

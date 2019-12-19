@@ -68,8 +68,8 @@ class CRM_Dedupetools_Upgrader extends CRM_Dedupetools_Upgrader_Base {
     CRM_Core_DAO::executeQuery("
 CREATE TABLE IF NOT EXISTS `civicrm_contact_name_pair` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `name_a` varchar(255) NOT NULL DEFAULT '',
-  `name_b` varchar(255) NOT NULL DEFAULT '',
+  `name_a` varchar(64) NOT NULL DEFAULT '',
+  `name_b` varchar(64) NOT NULL DEFAULT '',
   `is_name_b_nickname` tinyint(10) NOT NULL DEFAULT '0',
   `is_name_b_inferior` tinyint(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
