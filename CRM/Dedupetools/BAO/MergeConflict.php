@@ -11,7 +11,7 @@ class CRM_Dedupetools_BAO_MergeConflict extends CRM_Dedupetools_DAO_MergeConflic
    *
    * @throws \CiviCRM_API3_Exception
    */
-  public static function getBooleanFields() {
+  public static function getBooleanFields(): array {
     $booleanFields = [];
     $fields = civicrm_api3('Contact', 'getfields', [])['values'];
     $emailFields = civicrm_api3('Email', 'getfields', ['action' => 'create'])['values'];

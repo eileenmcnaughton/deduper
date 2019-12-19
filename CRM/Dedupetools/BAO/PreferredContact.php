@@ -67,7 +67,7 @@ class CRM_Dedupetools_BAO_PreferredContact  {
 
       case 'most_recently_modified_contact' :
         // You might thing the merge handler already got passed this info and we could save a DB look up
-        // but you would bee wrong - core didn't pass it through the hooks.
+        // but you would be wrong - core didn't pass it through the hooks.
         $contacts = civicrm_api3('Contact', 'get', ['id' => ['IN' => [$this->contact1, $this->contact2]], 'return' => 'modified_id'])['values'];
         if ($contacts[$this->contact1]['modified_date'] > $contacts[$this->contact2]['modified_date']) {
           return $this->contact1;

@@ -256,7 +256,7 @@ function dedupetools_civicrm_navigationMenu(&$menu) {
 /**
  * Do not require administer CiviCRM to use deduper.
  *
- *  @link https://docs.civicrm.org/dev/en/latest/hooks/hook_alterAPIPermissions
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_alterAPIPermissions
  *
  * @param string $entity
  * @param string $action

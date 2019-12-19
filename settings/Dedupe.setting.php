@@ -38,7 +38,7 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Fields to resolve as values from preferred contact'),
     'default' => [],
-    'title' => E::ts('Fields to resolve on preferred contact'),
+    'title' => E::ts('Fields to take from preferred contact'),
     'help_text' => '',
     'html_type' => 'select',
     'html_attributes' => [
