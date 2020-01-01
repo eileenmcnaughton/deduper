@@ -48,6 +48,17 @@ class CRM_DedupeTools_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
+   * Test the boolean resolver works.
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  public function testGetContactFields() {
+    $fields = CRM_Dedupetools_BAO_MergeConflict::getContactFields();
+    $this->assertTrue(isset($fields['contact_source']));
+    $this->assertFalse(isset($fields['source'], $fields['street_address']));
+  }
+
+  /**
    * Test that a boolean field is resolved if set.
    */
   public function testResolveBooleanFields() {
@@ -319,7 +330,7 @@ class CRM_DedupeTools_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->createDuplicateIndividuals([['first_name' => 'Theodore'], ['first_name' => 'Ted']]);
     $mergedContact = $this->doMerge($isReverse);
     $this->assertEquals('Theodore', $mergedContact['first_name']);
-    $this->assertEquals('Ted', $mergedContact['nick_name']);
+    $this->assertEquals('Ted', $mergedContact['nick_name'], 'Nick name should be set');
   }
 
   /**
