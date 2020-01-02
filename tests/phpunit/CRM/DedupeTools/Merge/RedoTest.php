@@ -1,6 +1,6 @@
 <?php
 
-use CRM_Dedupetools_ExtensionUtil as E;
+use CRM_Deduper_ExtensionUtil as E;
 use Civi\Test\HeadlessInterface;
 use Civi\Test\HookInterface;
 use Civi\Test\TransactionalInterface;
@@ -21,7 +21,7 @@ require_once __DIR__ . '/../DedupeBaseTestClass.php';
  *
  * @group headless
  */
-class CRM_DedupeTools_Merge_RedoTest extends DedupeBaseTestClass {
+class CRM_Deduper_Merge_RedoTest extends DedupeBaseTestClass {
 
   /**
    * Test redo-ing a merge.
