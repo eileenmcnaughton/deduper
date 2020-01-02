@@ -170,7 +170,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
-   * Test resolving an initial in the first name.
+   * Test resolving an initial in the last name.
    *
    * @param bool $isReverse
    *   Should we reverse which contact we merge into.
@@ -181,6 +181,24 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    */
   public function testInitialResolutionInLast($isReverse) {
     $this->createDuplicateIndividuals([['last_name' => 'M Smith'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('M', $mergedContact['middle_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+  }
+
+  /**
+   * Test resolving an initial in the first name.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testInitialResolutionInLastWhenMiddleInitialInOther($isReverse) {
+    $this->createDuplicateIndividuals([['last_name' => 'M Smith'], ['middle_name' => 'M']]);
     $mergedContact = $this->doMerge($isReverse);
     $this->assertEquals('Bob', $mergedContact['first_name']);
     $this->assertEquals('M', $mergedContact['middle_name']);
@@ -380,16 +398,50 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    * @param bool $isReverse
    *   Should we reverse which contact we merge into.
    *
-   * @dataProvider booleanDataProvider
+   * @dataProvider mergeConflictProvider
    *
    * @throws \CRM_Core_Exception
    */
-  public function testMisplacedNameResolutionFullNameInLastName($isReverse) {
-    $this->createDuplicateIndividuals([['first_name' => 'null', 'last_name' => 'Bob M Smith'], []]);
+  public function testMisplacedNameResolutions($isReverse, $data) {
+    $this->createDuplicateIndividuals([$data['contact_1'], $data['contact_2']]);
     $mergedContact = $this->doMerge($isReverse);
     $this->assertEquals('Bob', $mergedContact['first_name']);
     $this->assertEquals('Smith', $mergedContact['last_name']);
-    $this->assertEquals('M', $mergedContact['middle_name']);
+    $this->assertEquals($data['expected']['middle_name'], $mergedContact['middle_name']);
+  }
+
+  /**
+   * Get data to test merge conflicts on.
+   *
+   * Note that the default for first_name is Bob & for last name Smith - only
+   * overrides are set.
+   *
+   * Returns an  array with the reverse boolean plus contact inputs.
+   */
+  public function mergeConflictProvider(): array {
+    $dataset = [];
+    $dataset[] = [
+      'contact_1' => ['last_name' => 'M J Smith'],
+      'contact_2' => ['middle_name' => 'null'],
+      'expected' => ['middle_name' =>  'M J'],
+    ];
+    $dataset[] = [
+      'contact_1' => ['first_name' => 'null', 'last_name' => 'Bob M Smith'],
+      'contact_2' => [],
+    ];
+    $dataset[] = [
+      'contact_1' => ['first_name' => 'null', 'last_name' => 'Bob M Smith'],
+      'contact_2' => ['middle_name' => 'M'],
+    ];
+
+    $return = [];
+    $expected = ['first_name' => 'Bob', 'middle_name' => 'M', 'last_name' => 'Smith'];
+    foreach ($dataset as $data) {
+      $data['expected'] = array_merge($expected, $data['expected'] ?? []);
+      $return[] = [0, $data];
+      $return[] = [1, $data];
+    }
+    return $return;
   }
 
   /**
