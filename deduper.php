@@ -325,7 +325,7 @@ function deduper_civicrm_merge($type, &$refs, $mainId, $otherId, $tables) {
  * @param \CRM_Core_DAO $objectRef
  */
 function deduper_civicrm_post($op, $objectName, $objectId, &$objectRef) {
-  if ($objectName === 'NamePair') {
+  if ($objectName === 'ContactNamePair') {
     foreach ([$objectRef->name_b, $objectRef->name_a] as $value) {
       if ($value && \Civi::cache('dedupe_pairs')->has('name_alternatives_' . $value)) {
         \Civi::cache('dedupe_pairs')->delete('name_alternatives_' . $value);
