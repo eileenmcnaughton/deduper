@@ -1,0 +1,11 @@
+<af-form ctrl="modelListCtrl">
+  <af-entity data='{name_a : routeParams.name_a,  name_b : routeParams.name_b, is_name_b_nickname: routeParams.is_name_b_nickname, is_name_b_inferior: routeParams.is_name_b_inferior}' "autofill="1" type="ContactNamePair" name="NamePair" label="NamePair" />
+  <fieldset af-fieldset="NamePair" class="af-container af-layout-cols">
+    <legend class="af-text">Equivalent names</legend>
+    <af-field name="name_a" defn="{'title' : 'Most correct / `master` name (name A)'}"/>
+    <af-field name="name_b" defn="{}" field-default = 1 />
+    <af-field name="is_name_b_inferior" defn="" />
+    <af-field name="is_name_b_nickname" defn="" />
+
+  </fieldset><button class="af-button btn btn-primary" crm-icon="fa-check" ng-click="modelListCtrl.submit()">Submit</button>
+</af-form>
