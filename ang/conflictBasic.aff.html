@@ -9,8 +9,136 @@
       <span ng-if="conflict['title']">{{conflict['title']}}</span>
       <span ng-if="!conflict['title']">{{key}}</span>
       <span ng-if="!conflict['display']"><del>{{conflict[options.main_id]}}</del> <strong>{{conflict[options.other_id]}}</strong></span>
-      <div ng-if="conflict['display']"><div></div><del>{{conflict['display'][options.main_id]}}</del></div><div> <strong>{{conflict['display'][options.other_id]}}</strong></div></div>
+      <div ng-if="conflict['display']">
+        <div></div>
+        <del>{{conflict['display'][options.main_id]}}</del>
+      </div>
+      <div><strong>{{conflict['display'][options.other_id]}}</strong></div>
+
+      <div ng-if="(key === 'first_name')" class="accordion"
+           id="outer-accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+        <div class="card">
+          <div class="card-header" id="display-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+            <span class="mb-0">
+              <button class="btn btn-link btn-lg collapsed" type="button" data-toggle="collapse"
+                      data-target="#collapseOuter-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                      aria-expanded="false"
+                      aria-controls="collapseOuter-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                Save equivalent name pair `{{conflict[options.other_id]}}` and `{{conflict[options.main_id]}}`
+              </button>
+            </span>
+          </div>
+          <div class="card-body">
+            <div id="collapseOuter-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
+                 aria-labelledby="display-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                 data-parent="outer-accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+
+              <div class="accordion" id="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                <span>Saved name pairs are automatically resolved during safe merges based on your site setting: {{options.equivalentNameSetting}}</span>
+                <div class="card">
+                  <div class="card-header container-fluid" id="other-is-nick-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <span class="mb-0">
+                      <button class="btn btn-link btn-sm collapsed" type="button" data-toggle="collapse"
+                              data-target="#collapseOne-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                              aria-expanded="false"
+                              aria-controls="collapseOne-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                        `{{conflict[options.other_id]}}` is nickname of `{{conflict[options.main_id]}}`
+                      </button>
+
+                    </span>
+                  </div>
+
+                  <div id="collapseOne-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
+                       aria-labelledby="other-is-nick-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <div class="card-body">
+                      <div
+                        name-pair="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_nickname: 1}">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header container-fluid" id="main-is-nick-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <span class="mb-0">
+                      <button class="btn btn-link btn-sm collapsed" type="button" data-toggle="collapse"
+                              data-target="#collapseTwo-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                              aria-expanded="false"
+                              aria-controls="collapseTwo-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                        `{{conflict[options.main_id]}}` is nickname of `{{conflict[options.other_id]}}`
+                      </button>
+
+                    </span>
+                  </div>
+
+                  <div id="collapseTwo-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
+                       aria-labelledby="main-is-nick-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <div class="card-body">
+                      <div name-pair="{name_b: conflict[options.main_id], name_a: conflict[options.other_id], is_name_b_nickname: 1}"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class ="card">
+                  <div class="card-header container-fluid" id="main-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <span class="mb-0">
+                      <button class="btn btn-link btn-sm collapsed" type="button" data-toggle="collapse"
+                                                             data-target="#collapseThree-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" aria-expanded="false"
+                                                             aria-controls="collapseThree-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                        `{{conflict[options.other_id]}}` is a misspelling or less correct version of `{{conflict[options.main_id]}}`
+                      </button>
+                    </span>
+                  </div>
+                  <div id="collapseThree-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
+                       aria-labelledby="main-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <div class="card-body">
+                      <div name-pair="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_inferior : 1}"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class ="card">
+                  <div class="card-header container-fluid" id="other-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <span class="mb-0">
+                      <button class="btn btn-link btn-sm collapsed" type="button" data-toggle="collapse"
+                        data-target="#collapseFour-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" aria-expanded="false"
+                        aria-controls="collapseFour-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                        `{{conflict[options.main_id]}}` is a misspelling or less correct version of `{{conflict[options.other_id]}}`
+                      </button>
+                    </span>
+                  </div>
+                  <div id="collapseFour-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
+                       aria-labelledby="other-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <div class="card-body">
+                      <div name-pair="{name_b: conflict[options.main_id], name_a: conflict[options.other_id], is_name_b_inferior : 1}"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class ="card">
+                  <div class="card-header container-fluid" id="neither-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <span class="mb-0">
+                       <button class="btn btn-link btn-sm collapsed" type="button" data-toggle="collapse"
+                         data-target="#collapseFive-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" aria-expanded="false"
+                         aria-controls="collapseFive-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                        `{{conflict[options.main_id]}}` is interchangeable with `{{conflict[options.other_id]}}`
+                      </button>
+                    </span>
+                  </div>
+                  <div id="collapseFive-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
+                       aria-labelledby="neither-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
+                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                    <div class="card-body">
+                      <div name-pair="{name_b: conflict[options.main_id], name_a: conflict[options.other_id], is_name_b_inferior : 1}"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
 </div>
+
