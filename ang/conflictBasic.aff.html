@@ -31,7 +31,7 @@
           <div class="card-body">
             <div id="collapseOuter-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
                  aria-labelledby="display-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
-                 data-parent="outer-accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                 data-parent="#outer-accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
 
               <div class="accordion" id="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
                 <span>Saved name pairs are automatically resolved during safe merges based on your site setting: {{options.equivalentNameSetting}}</span>
@@ -50,7 +50,7 @@
 
                   <div id="collapseOne-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
                        aria-labelledby="other-is-nick-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
-                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                       data-parent="#accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
                     <div class="card-body">
                       <div
                         name-pair="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_nickname: 1}">
@@ -73,7 +73,7 @@
 
                   <div id="collapseTwo-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
                        aria-labelledby="main-is-nick-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
-                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                       data-parent="#accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
                     <div class="card-body">
                       <div name-pair="{name_b: conflict[options.main_id], name_a: conflict[options.other_id], is_name_b_nickname: 1}"></div>
                     </div>
@@ -91,7 +91,7 @@
                   </div>
                   <div id="collapseThree-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
                        aria-labelledby="main-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
-                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                       data-parent="#accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
                     <div class="card-body">
                       <div name-pair="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_inferior : 1}"></div>
                     </div>
@@ -109,7 +109,7 @@
                   </div>
                   <div id="collapseFour-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
                        aria-labelledby="other-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
-                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                       data-parent="#accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
                     <div class="card-body">
                       <div name-pair="{name_b: conflict[options.main_id], name_a: conflict[options.other_id], is_name_b_inferior : 1}"></div>
                     </div>
@@ -127,7 +127,7 @@
                   </div>
                   <div id="collapseFive-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}" class="collapse"
                        aria-labelledby="neither-is-better-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
-                       data-parent="accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
+                       data-parent="#accordion-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}">
                     <div class="card-body">
                       <div name-pair="{name_b: conflict[options.main_id], name_a: conflict[options.other_id], is_name_b_inferior : 1}"></div>
                     </div>
