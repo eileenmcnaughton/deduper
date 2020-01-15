@@ -39,12 +39,12 @@
                   <em><span ng-show="!options.equivalentNameSetting">{{ts('Only resolve inferior names - e.g misspellings')}}</span>{{options.equivalentNameSetting}}</em>
                 </div>
 
-                <label>
-                  <input type="radio" ng-show="options.equivalentNameSetting" ng-model="namePair" ng-value="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_nickname: 1}">
+                <label ng-show="options.equivalentNameSetting">
+                  <input type="radio"  ng-model="namePair" ng-value="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_nickname: 1}">
                   `{{conflict[options.other_id]}}` is nickname of `{{conflict[options.main_id]}}`
                 </label><br/>
-                <label>
-                  <input type="radio" ng-show="options.equivalentNameSetting" ng-model="namePair" ng-value="{name_a: conflict[options.other_id], name_b: conflict[options.main_id], is_name_b_nickname: 1}">
+                <label ng-show="options.equivalentNameSetting">
+                  <input type="radio" ng-model="namePair" ng-value="{name_a: conflict[options.other_id], name_b: conflict[options.main_id], is_name_b_nickname: 1}">
                   `{{conflict[options.main_id]}}` is nickname of `{{conflict[options.other_id]}}`
                 </label><br/>
                 <label>
@@ -55,9 +55,9 @@
                   <input type="radio" ng-model="namePair" ng-value="{name_a: conflict[options.other_id], name_b: conflict[options.main_id], is_name_b_inferior: 1}">
                   `{{conflict[options.main_id]}}` is  is a misspelling or less correct version of of `{{conflict[options.other_id]}}`
                 </label><br/>
-                <label>
-                  <input type="radio" ng-show="options.equivalentNameSetting" ng-model="namePair" ng-value="{name_a: conflict[options.main_id], name_b: conflict[options.other_id]}">
-                  `{{conflict[options.main_id]}}` is is interchangeable with of `{{conflict[options.other_id]}}`
+                <label ng-show="options.equivalentNameSetting">
+                  <input type="radio"  ng-model="namePair" ng-value="{name_a: conflict[options.main_id], name_b: conflict[options.other_id]}">
+                  `{{conflict[options.main_id]}}` is interchangeable with `{{conflict[options.other_id]}}`
                 </label><br/>
               </div>
               <div ng-show="namePair">
