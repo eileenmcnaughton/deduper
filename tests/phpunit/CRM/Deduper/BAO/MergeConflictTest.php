@@ -5,8 +5,10 @@ use Civi\Test\HeadlessInterface;
 use Civi\Test\HookInterface;
 use Civi\Test\TransactionalInterface;
 use Civi\Test\Api3TestTrait;
+use Civi\Api4\Email;
 
-require_once __DIR__  .'/../DedupeBaseTestClass.php';
+require_once __DIR__ . '/../DedupeBaseTestClass.php';
+
 /**
  * FIXME - Add test description.
  *
@@ -27,12 +29,16 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
 
   /**
    * Setup for class.
+   *
+   * @throws \CRM_Core_Exception
    */
   public function setUp() {
     parent::setUp();
     $this->callAPISuccess('Setting', 'create', [
       'deduper_resolver_bool_prefer_yes' => ['on_hold', 'do_not_email', 'do_not_phone', 'do_not_mail', 'do_not_sms', 'do_not_trade', 'is_opt_out'],
     ]);
+    // Make sure we don't have any lingering batch-mergeable contacts in the db.
+    $this->callAPISuccess('Job', 'process_batch_merge', ['mode' => 'safe']);
   }
 
   /**
@@ -60,6 +66,8 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
 
   /**
    * Test that a boolean field is resolved if set.
+   *
+   * @throws \CRM_Core_Exception
    */
   public function testResolveBooleanFields() {
     $this->createDuplicateIndividuals([['do_not_mail' => 0], ['do_not_mail' => 1]]);
@@ -82,18 +90,18 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
- * Test that in aggressive mode we keep the values of the most preferred contact.
- *
- * We use most recently created contact as our resolver as that is the opposite to the default
- * behaviour without our hook.
- *
- * @param bool $isReverse
- *   Should we reverse which contact we merge into.
- *
- * @dataProvider booleanDataProvider
- *
- * @throws \CRM_Core_Exception
- */
+   * Test that in aggressive mode we keep the values of the most preferred contact.
+   *
+   * We use most recently created contact as our resolver as that is the opposite to the default
+   * behaviour without our hook.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
   public function testResolveAggressivePreferredContact($isReverse) {
     $this->callAPISuccess('Setting', 'create', ['deduper_resolver_field_prefer_preferred_contact' => ['contact_source']]);
     $this->callAPISuccess('Setting', 'create', ['deduper_resolver_preferred_contact_resolution' => ['most_recently_created_contact']]);
@@ -148,7 +156,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    *
    * @return array
    */
-  public function booleanDataProvider() {
+  public function booleanDataProvider(): array {
     return [[0], [1]];
   }
 
@@ -398,9 +406,11 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    * @param bool $isReverse
    *   Should we reverse which contact we merge into.
    *
-   * @dataProvider mergeConflictProvider
+   * @param array $data
    *
    * @throws \CRM_Core_Exception
+   * @dataProvider mergeConflictProvider
+   *
    */
   public function testMisplacedNameResolutions($isReverse, $data) {
     $this->createDuplicateIndividuals([$data['contact_1'], $data['contact_2']]);
@@ -423,7 +433,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $dataset[] = [
       'contact_1' => ['last_name' => 'M J Smith'],
       'contact_2' => ['middle_name' => 'null'],
-      'expected' => ['middle_name' =>  'M J'],
+      'expected' => ['middle_name' => 'M J'],
     ];
     $dataset[] = [
       'contact_1' => ['first_name' => 'null', 'last_name' => 'Bob M Smith'],
@@ -578,10 +588,197 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
+   * Test that we don't treat the addition of a postal suffix only as a conflict.
+   *
+   * Bug T177807
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testBatchMergeResolvableConflictPostalSuffixExists($isReverse) {
+    $this->createDuplicateDonors();
+    $contactIDWithPostalSuffix = ($isReverse ? $this->ids['contact'][1] : $this->ids['contact'][0]);
+    $contactIDWithOutPostalSuffix = ($isReverse ? $this->ids['contact'][0] : $this->ids['contact'][1]);
+    $this->callAPISuccess('Address', 'create', [
+      'country_id' => 'MX',
+      'contact_id' => $contactIDWithPostalSuffix,
+      'location_type_id' => 1,
+      'street_address' => 'First on the left after you cross the border',
+      'postal_code' => 90210,
+      'postal_code_suffix' => 6666,
+    ]);
+    $this->callAPISuccess('Address', 'create', [
+      'country_id' => 'MX',
+      'contact_id' => $contactIDWithOutPostalSuffix,
+      'street_address' => 'First on the left after you cross the border',
+      'postal_code' => 90210,
+      'location_type_id' => 1,
+    ]);
+
+    $contact = $this->doMerge($isReverse);
+    $this->assertEquals('Mexico', $contact['country']);
+    $this->assertEquals('6666', $contact['postal_code_suffix']);
+    $this->assertEquals('90210', $contact['postal_code']);
+    $this->assertEquals('First on the left after you cross the border', $contact['street_address']);
+  }
+
+  /**
+   * Test that a conflict on casing in first names is handled.
+   *
+   * We do a best effort on this to get the more correct on assuming that 1 capital letter in a
+   * name is most likely to be deliberate. We prioritise less capital letters over more, except that
+   * all lower case is at the end of the queue.
+   *
+   * This won't necessarily give us the best results for 'La Plante' vs 'la Plante' but we should bear in mind
+   * - both variants have been entered by the user at some point so they have not 'chosen' one.
+   * - having 2 variants of the spelling of a name with more than one upper case letter in our
+   * db is an edge case.
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testCasingConflicts() {
+    $this->createDuplicateIndividuals([
+      ['first_name' => 'donald', 'last_name' => 'Duck'],
+      ['first_name' => 'Donald', 'last_name' => 'duck'],
+      ['first_name' => 'DONALD', 'last_name' => 'DUCK'],
+      ['first_name' => 'DonalD', 'last_name' => 'DUck'],
+    ]);
+    $mergedContact = $this->doBatchMerge($this->ids['contact'][0], ['skipped' => 0, 'merged' => 3]);
+    $this->assertEquals('Donald', $mergedContact['first_name']);
+    $this->assertEquals('Duck', $mergedContact['last_name']);
+  }
+
+  /**
+   * Make sure José whomps Jose.
+   *
+   * Test diacritic matches are resolved to the one using 'authentic' characters.
+   *
+   * @param array $names
+   * @param bool $isMatch
+   * @param string $preferredName
+   *
+   * @dataProvider getDiacriticData
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testDiacriticConflicts($names, $isMatch, $preferredName) {
+    $this->createDuplicateIndividuals([
+      ['first_name' => $names[0]],
+      ['first_name' => $names[1]],
+    ]);
+    $mergedContact = $this->doBatchMerge($this->ids['contact'][0], ['skipped' => (int) !$isMatch, 'merged' => (int) $isMatch]);
+    if ($isMatch) {
+      $this->assertEquals($preferredName, $mergedContact['first_name']);
+    }
+  }
+
+  /**
+   * Get names with different character sets.
+   */
+  public function getDiacriticData(): array {
+    $dataSet = [];
+    $dataSet['cyrilic_dissimilar_hyphenated'] = [
+      'pair' => ['Леони-́дович', 'ни́-тский'],
+      'is_match' => FALSE,
+      'choose' => NULL,
+    ];
+    $dataSet['germanic'] = [
+      'pair' => ['Boß', 'Boss'],
+      'is_match' => TRUE,
+      'choose' => 'Boß',
+    ];
+    $dataSet['germanic_reverse'] = [
+      'pair' => ['Boss', 'Boß'],
+      'is_match' => TRUE,
+      'choose' => 'Boß',
+    ];
+    $dataSet['accent_vs_no_accent'] = [
+      'pair' => ['Jose', 'Josè'],
+      'is_match' => TRUE,
+      'choose' => 'Josè',
+    ];
+    $dataSet['accent_vs_no_accent_revese'] = [
+      'pair' => ['José', 'Jose'],
+      'is_match' => TRUE,
+      'choose' => 'José',
+    ];
+    $dataSet['different_direction_accent'] = [
+      'pair' => ['Josè', 'José'],
+      'is_match' => TRUE,
+      // No preference applied, first wins.
+      'choose' => 'Josè',
+    ];
+    $dataSet['no_way_jose'] = [
+      'pair' => ['Jose', 'Josà'],
+      'is_match' => FALSE,
+      'choose' => NULL,
+    ];
+    $dataSet['cyric_sergei'] = [
+      'pair' => ['Серге́й', 'Sergei'],
+      // Actually this is a real translation but will not
+      // match at our level of sophistication.
+      'is_match' => FALSE,
+      'choose' => NULL,
+    ];
+    $dataSet['cyric_sergai'] = [
+      'pair' => ['Серге́й', 'Sergi'],
+      // Actually this is a real translation but will not
+      // match at our level of sophistication.
+      'is_match' => FALSE,
+      'choose' => NULL,
+    ];
+    $dataSet['cyrilic_different_length'] = [
+      'pair' => ['Серге́й', 'Серге'],
+      'is_match' => FALSE,
+      'choose' => NULL,
+    ];
+    $dataSet['cyrilic_dissimilar'] = [
+      'pair' => ['Леони́дович', 'ни́тский'],
+      'is_match' => FALSE,
+      'choose' => NULL,
+    ];
+    return $dataSet;
+  }
+
+  /**
+   * Test the handling when one of the email matches is not the primary one.
+   *
+   * We have 2 emails on one contact, the non-primary one matches the (only) primary
+   * email on the other contact. The location type of the 2 primary emails are the same so
+   * the type will need to be altered on one of them.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into.
+   *
+   * @dataProvider booleanDataProvider
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \API_Exception
+   */
+  public function testMergeEmailNonPrimary($isReverse) {
+    $this->createDuplicateDonors();
+    $contactIDWith2Emails = ($isReverse ? $this->ids['contact'][1] : $this->ids['contact'][0]);
+    Email::update()->setValues(['location_type_id:name' => 'Work'])->setCheckPermissions(FALSE)->addWhere('contact_id', '=', $contactIDWith2Emails)->execute();
+    Email::create()->setValues(['email' => 'better_duck@duckland.com', 'is_primary' => 1, 'location_type_id:name' => 'Home', 'contact_id' => ($contactIDWith2Emails)])->setCheckPermissions(FALSE)->execute();
+    $result = $this->doMerge($isReverse);
+    $emails = Email::get()->addSelect('*')->addWhere('contact_id', '=', $result['id'])->setOrderBy([ 'is_primary' => 'DESC'])->setCheckPermissions(FALSE)->execute();
+    $this->assertCount(2, $emails);
+    $primary = $emails->first();
+    $this->assertEquals('better_duck@duckland.com', $primary['email']);
+    $this->assertEquals(TRUE, $primary['is_primary']);
+  }
+
+  /**
    * Create individuals to dedupe.
    *
    * @param array $contactParams
    *   Arrays of parameters, one per contact.
+   *
+   * @throws \CRM_Core_Exception
    */
   private function createDuplicateIndividuals($contactParams = [[], []]) {
     $params = [
@@ -604,7 +801,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    *   It is good practice to do all dedupe tests twice using this reversal to cover
    *   both scenarios.
    *
-   * @return void
+   * @throws \CRM_Core_Exception
    */
   protected function doNotDoMerge($isReverse) {
     $toKeepContactID = $isReverse ? $this->ids['contact'][1] : $this->ids['contact'][0];
@@ -637,11 +834,34 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
+   * Action to batch merge contacts.
+   *
+   * @param int $toKeepContactID
+   *   Id of contact to be kept.
+   * @param array $expected
+   * @param bool $isAggressiveMode
+   *   Should aggressive mode be used.
+   *
+   * @return array|int
+   * @throws \CRM_Core_Exception
+   */
+  protected function doBatchMerge($toKeepContactID, $expected = [], $isAggressiveMode = FALSE) {
+    $mergeResult = $this->callAPISuccess('Job', 'process_batch_merge', ['mode' => ($isAggressiveMode ? 'aggressive' : 'safe')])['values'];
+    $mergedContact = $this->callAPISuccessGetSingle('Contact', ['id' => $toKeepContactID]);
+    foreach ($expected as $key => $value) {
+      $this->assertCount($value, $mergeResult[$key], $key . print_r($mergeResult, TRUE));
+    }
+    return $mergedContact;
+  }
+
+  /**
    * Create 2 donor contacts, differing in their source value.
    *
    * The first donor ($this->ids['contact'][0] is the more recent donor.
    *
    * @param array $overrides
+   *
+   * @throws \CRM_Core_Exception
    */
   protected function createDuplicateDonors($overrides = [['contact_source' => 'keep me'], ['contact_source' => 'ditch me']]) {
     $this->createDuplicateIndividuals($overrides);
