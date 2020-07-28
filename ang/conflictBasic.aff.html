@@ -41,19 +41,19 @@
 
                 <label ng-show="options.equivalentNameSetting">
                   <input type="radio"  ng-model="namePair" ng-value="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_nickname: 1}">
-                  `{{conflict[options.other_id]}}` is nickname of `{{conflict[options.main_id]}}`
+                  `{{conflict[options.other_id]}}` is a nickname of `{{conflict[options.main_id]}}`
                 </label><br/>
                 <label ng-show="options.equivalentNameSetting">
                   <input type="radio" ng-model="namePair" ng-value="{name_a: conflict[options.other_id], name_b: conflict[options.main_id], is_name_b_nickname: 1}">
-                  `{{conflict[options.main_id]}}` is nickname of `{{conflict[options.other_id]}}`
+                  `{{conflict[options.main_id]}}` is a nickname of `{{conflict[options.other_id]}}`
                 </label><br/>
                 <label>
                   <input type="radio" ng-model="namePair" ng-value="{name_a: conflict[options.main_id], name_b: conflict[options.other_id], is_name_b_inferior: 1}">
-                  `{{conflict[options.other_id]}}` is  is a misspelling or less correct version of of `{{conflict[options.main_id]}}`
+                  `{{conflict[options.other_id]}}` is a misspelling or less correct version of `{{conflict[options.main_id]}}`
                 </label><br/>
                 <label>
                   <input type="radio" ng-model="namePair" ng-value="{name_a: conflict[options.other_id], name_b: conflict[options.main_id], is_name_b_inferior: 1}">
-                  `{{conflict[options.main_id]}}` is  is a misspelling or less correct version of of `{{conflict[options.other_id]}}`
+                  `{{conflict[options.main_id]}}` is a misspelling or less correct version of `{{conflict[options.other_id]}}`
                 </label><br/>
                 <label ng-show="options.equivalentNameSetting">
                   <input type="radio"  ng-model="namePair" ng-value="{name_a: conflict[options.main_id], name_b: conflict[options.other_id]}">
