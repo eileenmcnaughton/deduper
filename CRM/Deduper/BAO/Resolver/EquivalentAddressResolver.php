@@ -16,7 +16,7 @@ class CRM_Deduper_BAO_Resolver_EquivalentAddressResolver extends CRM_Deduper_BAO
     foreach (array_keys($this->getAllAddressConflicts()) as $blockNumber) {
       $mainBlock = $this->getAddressBlock(TRUE, $blockNumber);
       $otherBlock = $this->getAddressBlock(FALSE, $blockNumber);
-      if ($this->hasSamePostalCodeButDifferentSuffix($mainBlock, $otherBlock)) {
+      if ($this->hasSamePostalCodeButOneSuffixIsEmpty($mainBlock, $otherBlock)) {
         $postalCodeSuffix = $mainBlock['postal_code_suffix'] ?? $otherBlock['postal_code_suffix'];
         $this->setResolvedAddressValue('postal_code_suffix', 'address', $blockNumber, $postalCodeSuffix);
       }
@@ -31,16 +31,18 @@ class CRM_Deduper_BAO_Resolver_EquivalentAddressResolver extends CRM_Deduper_BAO
    *
    * @return bool
    */
-  protected function hasSamePostalCodeButDifferentSuffix(array $mainBlock, array $otherBlock): bool {
+  protected function hasSamePostalCodeButOneSuffixIsEmpty(array $mainBlock, array $otherBlock): bool {
     if (empty($mainBlock['postal_code']) || empty($otherBlock['postal_code'])
       || $mainBlock['postal_code'] !== $otherBlock['postal_code']
     ) {
       return FALSE;
     }
-    if (empty($mainBlock['postal_code_suffix']) && empty($otheBlock['postal_code_suffix'])) {
-      return  FALSE;
+    // If both are empty this does not apply.
+    if (empty($mainBlock['postal_code_suffix']) && empty($otherBlock['postal_code_suffix'])) {
+      return FALSE;
     }
-    if (($mainBlock['postal_code_suffix'] ?? '') === ($otherBlock['postal_code_suffix'] ?? '')) {
+    // If neither are empty this does not apply.
+    if (!empty($mainBlock['postal_code_suffix']) && !empty($otherBlock['postal_code_suffix'])) {
       return FALSE;
     }
     return TRUE;

@@ -534,9 +534,9 @@ class CRM_Deduper_BAO_MergeHandler {
     $otherBlock = &$this->dedupeData['migration_info']['other_details']['location_blocks']['address'][$block];
 
     if (!empty($this->addressConflicts[$block]['display'])) {
-      $mainBlock['display'] = CRM_Utils_Address::format($mainBlock);
-      $otherBlock['display'] = CRM_Utils_Address::format($mainBlock);
-      if ($mainBlock['display'] === $otherBlock['display']) {
+      $mainDisplay = CRM_Utils_Address::format(array_merge($mainBlock, [$fieldName => $value]));
+      $otherDisplay = CRM_Utils_Address::format(array_merge($otherBlock, [$fieldName => $value]));
+      if ($mainDisplay === $otherDisplay) {
         unset($this->addressConflicts[$block]['display']);
       }
     }
