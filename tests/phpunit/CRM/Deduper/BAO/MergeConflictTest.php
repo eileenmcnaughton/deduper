@@ -807,34 +807,6 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
-   * Test the handling when one of the email matches is not the primary one.
-   *
-   * We have 2 emails on one contact, the non-primary one matches the (only) primary
-   * email on the other contact. The location type of the 2 primary emails are the same so
-   * the type will need to be altered on one of them.
-   *
-   * @param bool $isReverse
-   *   Should we reverse which contact we merge into.
-   *
-   * @dataProvider booleanDataProvider
-   *
-   * @throws \CRM_Core_Exception
-   * @throws \API_Exception
-   */
-  public function testMergeEmailNonPrimary($isReverse) {
-    $this->createDuplicateDonors();
-    $contactIDWith2Emails = ($isReverse ? $this->ids['contact'][1] : $this->ids['contact'][0]);
-    Email::update()->setValues(['location_type_id:name' => 'Work'])->setCheckPermissions(FALSE)->addWhere('contact_id', '=', $contactIDWith2Emails)->execute();
-    Email::create()->setValues(['email' => 'better_duck@duckland.com', 'is_primary' => 1, 'location_type_id:name' => 'Home', 'contact_id' => ($contactIDWith2Emails)])->setCheckPermissions(FALSE)->execute();
-    $result = $this->doMerge($isReverse);
-    $emails = Email::get()->addSelect('*')->addWhere('contact_id', '=', $result['id'])->setOrderBy([ 'is_primary' => 'DESC'])->setCheckPermissions(FALSE)->execute();
-    $this->assertCount(2, $emails);
-    $primary = $emails->first();
-    $this->assertEquals('better_duck@duckland.com', $primary['email']);
-    $this->assertEquals(TRUE, $primary['is_primary']);
-  }
-
-  /**
    * Create individuals to dedupe.
    *
    * @param array $contactParams
