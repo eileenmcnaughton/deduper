@@ -42,7 +42,7 @@ class Clean extends CleanBase {
   protected function getSalientValues($email): array {
     $salientValues = [];
     // Email duplicates email address & location, grab any extra detail & delete it.
-    foreach (['email', 'on_hold', 'is_billing', 'is_bulk_mail', 'hold_date', 'reset_date', 'signature_text', 'signature_html'] as $key) {
+    foreach (['on_hold', 'is_billing', 'is_bulk_mail', 'hold_date', 'reset_date', 'signature_text', 'signature_html'] as $key) {
       if (!empty($email[$key])) {
         $salientValues[$key] = $email[$key];
       }

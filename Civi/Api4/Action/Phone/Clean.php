@@ -100,9 +100,9 @@ class Clean extends CleanBase {
   protected function getSalientValues($entity): array {
     $salientValues = [];
     // Email duplicates email address & location, grab any extra detail & delete it.
-    foreach (['phone_ext', 'phone_type_id', 'phone'] as $key) {
-      if (!empty($entity[$key])) {
-        $salientValues[$key] = $entity[$key];
+    foreach (['phone_ext', 'phone_type_id'] as $key) {
+      if (!empty($email[$key])) {
+        $salientValues[$key] = $email[$key];
       }
     }
     return $salientValues;
