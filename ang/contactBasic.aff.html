@@ -11,9 +11,12 @@
           last_name: contact['result'].last_name,
           first_name: contact['result'].first_name,
           middle_name: contact['result'].middle_name,
-          nick_name: contact['result'].nick_name,
-          email: contact['result'].email
-        }
+          nick_name: contact['result'].nick_name
+        },
+        chain: {'email':['Email', 'update', {
+          'where':[['contact_id', '=', '$id'], ['is_primary', '=', true]],
+          'values' : {'email' : contact['result'].email}
+        }]}
      })"
      onhide="contact.refresh()"
      editable-form crm-ui-id-scope>
