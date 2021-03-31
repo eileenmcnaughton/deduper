@@ -17,7 +17,7 @@ return [
     'is_contact' => 0,
     'description' => E::ts('Yes/No fields where yes always wins'),
     'default' => ['on_hold', 'do_not_email', 'do_not_phone', 'do_not_mail', 'do_not_sms', 'do_not_trade', 'is_opt_out'],
-    'title' => E::ts('Fields to resolve as YES'),
+    'title' => E::ts('Fields to resolve preferring YES'),
     'help_text' => '',
     'html_type' => 'select',
     'html_attributes' => [
