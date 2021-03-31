@@ -190,4 +190,23 @@ return [
       'callback' => 'CRM_Deduper_BAO_MergeConflict::getLocationResolvers',
     ],
   ],
+  'deduper_resolver_custom_groups_to_skip' => [
+    'name' => 'deduper_resolver_custom_groups_to_skip',
+    'type' => 'String',
+    'serialize' => CRM_Core_DAO::SERIALIZE_JSON,
+    'is_domain' => 1,
+    'description' => E::ts('Custom tables that should be completely ignored (generally calculated fields such as summary fields)'),
+    'default' => [],
+    'title' => E::ts('Custom tables to skip'),
+    'help_text' => '',
+    'html_type' => 'select',
+    'html_attributes' => [
+      'class' => 'crm-select2',
+      'multiple' => 1,
+    ],
+    'settings_pages' => ['deduper' => ['weight' => 150]],
+    'pseudoconstant' => [
+      'callback' => 'CRM_Deduper_BAO_MergeConflict::getCustomGroups',
+    ],
+  ],
 ];
