@@ -195,6 +195,7 @@ return [
     'type' => 'String',
     'serialize' => CRM_Core_DAO::SERIALIZE_JSON,
     'is_domain' => 1,
+    'is_contact' => 0,
     'description' => E::ts('Custom tables that should be completely ignored (generally calculated fields such as summary fields)'),
     'default' => [],
     'title' => E::ts('Custom tables to skip'),

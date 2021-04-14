@@ -140,12 +140,17 @@ class CRM_Deduper_BAO_MergeConflict extends CRM_Deduper_DAO_MergeConflict {
    * @throws \API_Exception
    */
   public static function getCustomGroups() : array {
-    return CustomField::getFields()
+    $groups = CustomField::getFields()
       ->setCheckPermissions(FALSE)
-      ->setLoadOptions(TRUE)
+      ->setLoadOptions(['name', 'label'])
       ->addSelect('options')
       ->addWhere('name', '=', 'custom_group_id')
       ->execute()->first()['options'];
+    $return = [];
+    foreach ($groups as $group) {
+      $return[$group['name']] = $group['label'];
+    }
+    return $return;
   }
 
 }
