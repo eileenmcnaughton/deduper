@@ -254,15 +254,6 @@ function deduper_civicrm_navigationMenu(&$menu) {
     'separator' => 0,
   ]);
   _deduper_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens', [
-    'label' => E::ts('Deduper Conflict Resolution'),
-    'name' => 'dedupe_settings',
-    'url' => 'civicrm/search#/display/Equivalent_names/Equivalent_names',
-    'permission' => 'administer CiviCRM data',
-    'operator' => 'OR',
-    'separator' => 0,
-  ]);
-  _deduper_civix_navigationMenu($menu);
-  _deduper_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens/Deduper', [
     'label' => E::ts('Deduper'),
     'name' => 'Deduper',
     'url' => '',
@@ -272,6 +263,14 @@ function deduper_civicrm_navigationMenu(&$menu) {
   ]);
   _deduper_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens/Deduper', [
     'label' => E::ts('Deduper Conflict Resolution'),
+    'name' => 'dedupe_settings',
+    'url' => 'civicrm/admin/setting/deduper',
+    'permission' => 'administer CiviCRM data',
+    'operator' => 'OR',
+    'separator' => 0,
+  ]);
+  _deduper_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens/Deduper', [
+    'label' => E::ts('Deduper Equivalent Names'),
     'name' => 'dedupe_settings',
     'url' => 'civicrm/search#/display/Equivalent_names/Equivalent_names',
     'permission' => 'administer CiviCRM data',
