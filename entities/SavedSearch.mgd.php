@@ -16,6 +16,7 @@ return [
     'name' => 'Contact Name Pairs Search',
     'entity' => 'SavedSearch',
     'cleanup' => 'never',
+    'update' => 'never',
     'params' => [
       'version' => 4,
       'checkPermissions' => FALSE,
