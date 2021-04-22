@@ -13,8 +13,7 @@ if (!civicrm_api3('Extension', 'getcount', [
 }
 return [
   [
-    $result =
-      'name' => 'Contact Name Pairs Search',
+    'name' => 'Contact Name Pairs Search',
     'entity' => 'SavedSearch',
     'cleanup' => 'never',
     'update' => 'never',
@@ -47,8 +46,9 @@ return [
               'saved_search_id' => '$id',
               'type' => 'table',
               'settings' => [
-                'limit' => 20,
+                'limit' => 50,
                 "pager" => TRUE,
+                'action' => TRUE,
                 "columns" => [
                   [
                     "key" => "name_a",
