@@ -11,13 +11,14 @@
 --
 -- /*******************************************************
 -- *
--- * Clean up the exisiting tables
+-- * Clean up the existing tables
 -- *
 -- *******************************************************/
 
 SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS `civicrm_mergeconflict`;
+DROP TABLE IF EXISTS `civicrm_contact_name_pair_family`;
 DROP TABLE IF EXISTS `civicrm_contact_name_pair`;
 
 SET FOREIGN_KEY_CHECKS=1;
