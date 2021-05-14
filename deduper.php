@@ -215,7 +215,12 @@ function deduper_civicrm_searchTasks($objectType, &$tasks) {
       'class' => 'CRM_Contact_Form_Task_FindDuplicates',
       'result' => TRUE,
     ];
-
+    $tasks[] = [
+      'title' => ts('Flip Contacts'),
+      'name' => 'flip',
+      'icon' => 'fa-save',
+      'uiDialog' => ['templateUrl' => '~/crmSearchActions/crmSearchActionUpdate.html'],
+    ];
   }
 }
 

@@ -36,6 +36,18 @@ class Name extends Generic\AbstractEntity {
   }
 
   /**
+   * Parse a name into it's parts.
+   *
+   * @param bool $checkPermissions
+   *
+   * @return \Civi\Api4\Action\Name\Flip
+   */
+  public static function flip($checkPermissions = TRUE): Action\Name\Flip {
+    return (new Action\Name\Flip(__CLASS__, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
+  }
+
+  /**
    * Get permissions.
    *
    * It may be that we don't need a permission check on this api at all at there is a check on the entity
@@ -44,7 +56,10 @@ class Name extends Generic\AbstractEntity {
    * @return array
    */
   public static function permissions():array {
-    return ['parse' => \CRM_Core_Permission::ALWAYS_ALLOW_PERMISSION];
+    return [
+      'parse' => \CRM_Core_Permission::ALWAYS_ALLOW_PERMISSION,
+      'flip' => 'Edit all contacts',
+    ];
   }
 
   /**
