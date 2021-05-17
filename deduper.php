@@ -449,6 +449,7 @@ function deduper_civicrm_container($container) {
  */
 function deduper_civicrm_entityTypes(&$entityTypes) {
   _deduper_civix_civicrm_entityTypes($entityTypes);
+  $entityTypes['CRM_Deduper_DAO_ContactNamePairFamily']['links_callback'][] = ['CRM_Deduper_BAO_ContactNamePairFamily', 'alterLinks'];
 }
 
 /**
