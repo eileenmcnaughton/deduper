@@ -4,23 +4,17 @@ use CRM_Deduper_ExtensionUtil as E;
 class CRM_Deduper_BAO_ContactNamePairFamily extends CRM_Deduper_DAO_ContactNamePairFamily {
 
   /**
-   * Create a new ContactNamePairFamily based on array-data
+   * Callback to alter CRM_Deduper_DAO_ContactNamePairFamily::getReferenceColumns().
    *
-   * @param array $params key-value pairs
-   * @return CRM_Deduper_DAO_ContactNamePairFamily|NULL
+   * Declare a pseudo-fk between name_b and Contact.first_name so it can be joined in SearchKit.
    *
-  public static function create($params) {
-    $className = 'CRM_Deduper_DAO_ContactNamePairFamily';
-    $entityName = 'ContactNamePairFamily';
-    $hook = empty($params['id']) ? 'create' : 'edit';
-
-    CRM_Utils_Hook::pre($hook, $entityName, CRM_Utils_Array::value('id', $params), $params);
-    $instance = new $className();
-    $instance->copyValues($params);
-    $instance->save();
-    CRM_Utils_Hook::post($hook, $entityName, $instance->id, $instance);
-
-    return $instance;
-  } */
+   * @see deduper_civicrm_entityTypes
+   *
+   * @param string $className
+   * @param array $links
+   */
+  public static function alterLinks($className, &$links) {
+    $links[] = new CRM_Core_Reference_Basic(self::getTableName(), 'name_b', 'civicrm_contact', 'first_name');
+  }
 
 }
