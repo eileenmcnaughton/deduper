@@ -11,7 +11,7 @@ theme:
 nav:
 - Home: index.md
 - Resolvers: resolvers.md
-- Data Cleanup: data-cleanup.md
+- Data Cleanup: data-management.md
 
 markdown_extensions:
   - attr_list
