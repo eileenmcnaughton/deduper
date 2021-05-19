@@ -11,7 +11,7 @@ theme:
 nav:
 - Home: index.md
 - Resolvers: resolvers.md
-- Testing: testing.md
+- Data Cleanup: data-cleanup.md
 
 markdown_extensions:
   - attr_list
