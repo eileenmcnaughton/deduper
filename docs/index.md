@@ -2,8 +2,11 @@
 ## Overview
 
 Provides tools for deduping
+
   - resolvers to make intelligent decisions about deduping
+
   - apis for code cleanup
+
   - alternate UI for more rapid deduping
 
 ## Features
