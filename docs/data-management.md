@@ -47,5 +47,5 @@ first and last names
 If you wish to cleanup these names in bulk you can do it from the
 command line with a command like this
 
-echo '{"join":[["ContactNamePairFamily AS contact_name_pair_family","INNER",null,["first_name","=","contact_name_pair_family.name_b"]]],"limit":25,"chain":{"flip":["Contact","update",{"where":[["id","=","$id"]],"values":{"first_name":"$last_name","last_name":"$first_name"}}]}, "checkPermissions":false, "version":4, "limit":1000}' | drush cvapi  Contact.get --in=json
+echo '{"join":[["ContactNamePairFamily AS contact_name_pair_family","INNER",null,["first_name","=","contact_name_pair_family.name_b"]]],"chain":{"flip":["Contact","update",{"where":[["id","=","$id"]],"values":{"first_name":"$last_name","last_name":"$first_name"}}]}, "checkPermissions":false, "version":4, "limit":1000}' | drush cvapi  Contact.get --in=json
 
