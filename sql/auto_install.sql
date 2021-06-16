@@ -80,10 +80,10 @@ CREATE TABLE `civicrm_mergeconflict` (
   `contact_1` int unsigned COMMENT 'FK to Contact',
   `contact_2` int unsigned COMMENT 'FK to Contact',
   `group_id` int unsigned COMMENT 'FK to Group',
-  `conflicted_field` varchar(0),
-  `value_1` varchar(0),
-  `value_2` varchar(0),
-  `analysis` varchar(0),
+  `conflicted_field` varchar(255),
+  `value_1` varchar(255),
+  `value_2` varchar(255),
+  `analysis` varchar(255),
   PRIMARY KEY (`id`)
 )
 ENGINE=InnoDB;
