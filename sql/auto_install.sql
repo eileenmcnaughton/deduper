@@ -60,6 +60,8 @@ CREATE TABLE `civicrm_contact_name_pair_family` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ContactNamePair ID',
   `name_a` varchar(64) COMMENT 'Family name (generally the anglicised options)',
   `name_b` varchar(64) COMMENT 'Alternate name',
+  `is_most_common_form` tinyint DEFAULT 0 COMMENT 'Is this the most common way to write this name?',
+  `is_active` tinyint DEFAULT 1 COMMENT 'Is this variant active?',
   PRIMARY KEY (`id`),
   INDEX `name_a`(name_a),
   INDEX `name_b`(name_b)
