@@ -27,6 +27,9 @@
   <civix>
     <namespace>CRM/Deduper</namespace>
   </civix>
+  <mixins>
+    <mixin>afform-entity-php@1.0.0</mixin>
+  </mixins>
   <classloader>
     <psr0 prefix="CRM_" path=""/>
     <psr4 prefix="Civi\" path="Civi" />
