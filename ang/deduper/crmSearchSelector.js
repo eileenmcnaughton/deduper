@@ -39,7 +39,6 @@
   angular.module('deduper').directive('crmSearchSelector', function() {
     // Cache schema metadata
     return {
-      templateUrl: '~/deduper/crmSearchSelector.html',
       scope: {
         data: '=crmSearchSelector'
       },
