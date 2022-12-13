@@ -7,17 +7,18 @@
  >
 
     <form name="basicContact"
-      onaftersave="console.log(contact);crmApi4('Contact','update', {
+      onaftersave="
+      crmApi4('Contact','update', {
         'where' :[['id','=', options.contact_id]],
         'values' : {
-          last_name: contact['result'][0].last_name,
-          first_name: contact['result'][0].first_name,
-          middle_name: contact['result'][0].middle_name,
-          nick_name: contact['result'][0].nick_name
+          'last_name': contact['result'][0].last_name,
+          'first_name': contact['result'][0].first_name,
+          'middle_name': contact['result'][0].middle_name,
+          'nick_name': contact['result'][0].nick_name,
         },
         chain: {'email':['Email', 'update', {
           'where':[['contact_id', '=', '$id'], ['is_primary', '=', true]],
-          'values' : {'email' : contact['result'][0].email}
+          'values' : {'email' : contact['result'][0]['email_primary.email']}
         }]}
      })"
      onhide="contact.refresh()"
