@@ -53,9 +53,6 @@ might need to play around with limits and ID ranges to ensure that all the Kates
 database have a turn in the Search Contact Set.
 
 
-The most confusing thing to understand is the way the criteria interact with the configured
-'limit'.
-
 ![img.png](images/limit.png)
 
-In order to build a dedupe query the code has to internally find every
+
