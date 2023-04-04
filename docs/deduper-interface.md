@@ -54,5 +54,3 @@ database have a turn in the Search Contact Set.
 
 
 ![img.png](images/limit.png)
-
-
