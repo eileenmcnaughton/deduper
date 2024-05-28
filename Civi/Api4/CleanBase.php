@@ -123,7 +123,7 @@ abstract class CleanBase extends AbstractAction {
   protected function identifyEntitiesToCleanUp() {
     foreach (array_keys($this->entities) as $contactID) {
       $this->entitiesToKeep[$contactID] = [];
-      foreach ($this->getEntitiesForContactByLocation($contactID) as $locationTypeID => $entities) {
+      foreach ($this->getEntitiesForContactByLocation($contactID) as $entities) {
         if (count($entities) > 1) {
           $keeper = array_shift($entities);
           $originalKeeper = $keeper;
