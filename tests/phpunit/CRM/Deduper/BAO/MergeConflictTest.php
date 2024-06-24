@@ -259,6 +259,27 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
+   * Test resolving mis-cased names with an uninformative character.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into?
+   *
+   * @dataProvider booleanDataProvider
+   */
+  public function testUninformativeCharactersWithCasingDifference(bool $isReverse): void {
+    $this->createDuplicateIndividuals([['last_name' => 'Gold Smith'], ['last_name' => 'golD-sMith']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    // We are not doing any preference handling here so as long as it is one of them it's OK.
+    if ($isReverse) {
+      $this->assertEquals('golD-sMith', $mergedContact['last_name']);
+    }
+    else {
+      $this->assertEquals('Gold Smith', $mergedContact['last_name']);
+    }
+  }
+
+  /**
    * Test that we don't allow silly names to create a conflict.
    *
    * Sometimes people enter cruft like 'first' for first_name. Later they
