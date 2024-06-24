@@ -1,6 +1,7 @@
 <?php
 
 use Civi\Api4\Address;
+use Civi\Api4\OptionValue;
 use Civi\Test\Api3TestTrait;
 use Civi\Api4\Email;
 use Civi\Test\EntityTrait;
@@ -203,6 +204,53 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    */
   public function testInitialResolutionNameIsInitial(bool $isReverse): void {
     $this->createDuplicateIndividuals([['last_name' => 'S', 'first_name' => 'B'], []]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+  }
+
+  /**
+   * Test resolving mis-cased names with an uninformative character.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into?
+   *
+   * @dataProvider booleanDataProvider
+   */
+  public function testCustomGreetingMismatch(bool $isReverse): void {
+    $emailGreetings = OptionValue::get(FALSE)
+      ->addWhere('option_group_id:name', '=', 'email_greeting')
+      ->addSelect('id', 'name', 'is_default', 'value')
+      ->addOrderBy('is_default', 'DESC')
+      ->execute()->indexBy('name');
+
+    $postalGreetings = OptionValue::get(FALSE)
+      ->addWhere('option_group_id:name', '=', 'postal_greeting')
+      ->addSelect('id', 'name', 'is_default', 'value')
+      ->addOrderBy('is_default', 'DESC')
+      ->execute()->indexBy('name');
+
+    $addressee = OptionValue::get(FALSE)
+      ->addWhere('option_group_id:name', '=', 'addressee')
+      ->addSelect('id', 'name', 'is_default', 'value')
+      ->addOrderBy('is_default', 'DESC')
+      ->execute()->indexBy('name');
+
+    $this->createDuplicateIndividuals([
+      [
+        'email_greeting_id' => $emailGreetings->first()['value'],
+        'postal_greeting_id' => $postalGreetings->first()['value'],
+        'addressee_id' => $addressee->first()['value'],
+      ],
+      [
+        'email_greeting_id' => $emailGreetings['Customized']['value'],
+        'postal_greeting_id' => $postalGreetings['Customized']['value'],
+        'addressee_id' => $addressee['Customized']['value'],
+        'email_greeting_custom' => 'Bob',
+        'postal_greeting_custom' => 'Bob',
+        'addressee_custom' => 'Bob',
+      ],
+    ]);
     $mergedContact = $this->doMerge($isReverse);
     $this->assertEquals('Bob', $mergedContact['first_name']);
     $this->assertEquals('Smith', $mergedContact['last_name']);
