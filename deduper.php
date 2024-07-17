@@ -364,10 +364,14 @@ function deduper_civicrm_container($container) {
 /**
  * Implements hook_civicrm_entityTypes().
  *
- * Declare entity types provided by this module.
- *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
  */
 function deduper_civicrm_entityTypes(&$entityTypes) {
-  $entityTypes['CRM_Deduper_DAO_ContactNamePairFamily']['links_callback'][] = ['CRM_Deduper_BAO_ContactNamePairFamily', 'alterLinks'];
+  // TODO: When upgrading mixin to entity-types-php@2.0, this loop can be reliably changed to:
+  // $entityTypes['ContactNamePairFamily']['links_callback'][] = ['CRM_Deduper_BAO_ContactNamePairFamily', 'alterLinks'];
+  foreach ($entityTypes as &$entityType) {
+    if ($entityType['name'] === 'ContactNamePairFamily') {
+      $entityType['links_callback'][] = ['CRM_Deduper_BAO_ContactNamePairFamily', 'alterLinks'];
+    }
+  }
 }
