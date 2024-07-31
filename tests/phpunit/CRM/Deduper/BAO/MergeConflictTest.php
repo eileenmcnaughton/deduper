@@ -291,7 +291,8 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   }
 
   /**
-   * Test resolving an initial in the first name when the other contact already has the same value as an initial with a dot.
+   * Test resolving an initial in the first name when the other contact already has the same value as an initial with a
+   * dot.
    *
    * i.e. [first_name => 'Bob J'] vs ['first_name' => 'Bob', 'middle_name' => 'J.']
    *
@@ -728,6 +729,58 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->assertNotEmpty($address[1]['location_type_id']);
     $this->assertNotEquals($address[0]['location_type_id'], $address[1]['location_type_id']);
     $this->assertEquals('33 Main Street', $address[1]['street_address']);
+  }
+
+  /**
+   * Test handling when 2 addresses with the same details are resolved.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into?
+   *
+   * @dataProvider booleanDataProvider
+   */
+  public function testAddressMergeWithLocationWrangling(bool $isReverse): void {
+    $this->createDuplicateIndividuals();
+    $this->createTestEntity('Contribution', [
+      'receive_date' => 'now',
+      'financial_type_id:name' => 'Donation',
+      'total_amount' => 5,
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+    $this->setSetting('deduper_resolver_preferred_contact_resolution', [
+      'most_recent_contributor',
+    ]);
+    $this->setSetting('deduper_location_priority_order', [
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Billing'),
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Home'),
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Mailing'),
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Other'),
+    ]);
+    $this->setSetting('deduper_resolver_email', 'preferred_contact_with_re-assign');
+    // drush @wmff cvapi Contact.merge mode=safe to_keep_id=460068 to_remove_id=931898
+
+    $this->createTestEntity('Email', [
+      'location_type_id:name' => 'Billing',
+      'email' => 'move_mail1@example.com',
+      'contact_id' => $this->ids['Contact'][0],
+    ]);
+    $this->createTestEntity('Email', [
+      'location_type_id:name' => 'Billing',
+      'email' => 'move_mail0@example.com',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+    $this->createTestEntity('Email', [
+      'location_type_id:name' => 'Mailing',
+      'email' => 'mail_3@example.com',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+    $contact = $this->doMerge($isReverse);
+    $emails = Email::get(FALSE)
+      ->addSelect('email', 'location_type_id:name', 'contact_id')
+      ->addWhere('contact_id', '=', $contact['id'])
+      ->execute()->indexBy('location_type_id:name');
+    $this->assertCount(4, $emails);
+    $this->assertEquals('move_mail' . (int) $isReverse . '@example.com', $emails['Other']['email']);
   }
 
   /**
