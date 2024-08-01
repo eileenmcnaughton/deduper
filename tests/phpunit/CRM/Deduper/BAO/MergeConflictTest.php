@@ -32,6 +32,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    */
   public function setUp(): void {
     parent::setUp();
+    $this->setSetting('deduper_resolver_field_prefer_preferred_contact', ['source']);
     // Make sure we don't have any lingering batch-merge-able contacts in the db.
     $this->callAPISuccess('Job', 'process_batch_merge', ['mode' => 'safe']);
   }
