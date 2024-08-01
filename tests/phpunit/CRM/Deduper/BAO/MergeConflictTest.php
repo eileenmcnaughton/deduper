@@ -74,7 +74,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->assertEquals(1, $mergedContacts[$this->ids['Contact'][0]]['do_not_mail']);
 
     // Now try merging a contact with 0 in that field into our retained contact.
-    $this->ids['Contact'][2] = $this->callAPISuccess('Contact', 'create', ['first_name' => 'bob', 'do_not_mail' => 0, 'contact_type' => 'Individual'])['id'];
+    $this->createTestEntity('Contact', ['first_name' => 'bob', 'do_not_mail' => 0, 'contact_type' => 'Individual'], 2)['id'];
     $this->callAPISuccess('Contact', 'merge', ['to_keep_id' => $this->ids['Contact'][0], 'to_remove_id' => $this->ids['Contact'][2]]);
     $mergedContacts = $this->callAPISuccess('Contact', 'get', ['id' => ['IN' => $this->ids['Contact'], 'is_deleted' => 0]])['values'];
 
@@ -743,16 +743,16 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->createDuplicateDonors();
     $contactIDWithPostalSuffix = ($isReverse ? $this->ids['Contact'][1] : $this->ids['Contact'][0]);
     $contactIDWithOutPostalSuffix = ($isReverse ? $this->ids['Contact'][0] : $this->ids['Contact'][1]);
-    $this->callAPISuccess('Address', 'create', [
-      'country_id' => 'MX',
+    $this->createTestEntity('Address', [
+      'country_id:name' => 'MX',
       'contact_id' => $contactIDWithPostalSuffix,
       'location_type_id' => 1,
       'street_address' => 'First on the left after you cross the border',
       'postal_code' => 90210,
       'postal_code_suffix' => 6666,
     ]);
-    $this->callAPISuccess('Address', 'create', [
-      'country_id' => 'MX',
+    $this->createTestEntity('Address', [
+      'country_id:name' => 'MX',
       'contact_id' => $contactIDWithOutPostalSuffix,
       'street_address' => 'First on the left after you cross the border',
       'postal_code' => 90210,
@@ -781,21 +781,21 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->createDuplicateDonors();
     $contactIDWithCountryOnlyAddress = ($isReverse ? $this->ids['Contact'][1] : $this->ids['Contact'][0]);
     $contactIDWithFullAddress = ($isReverse ? $this->ids['Contact'][0] : $this->ids['Contact'][1]);
-    $this->callAPISuccess('Address', 'create', [
-      'country_id' => 'MX',
+    $this->createTestEntity('Address', [
+      'country_id:name' => 'MX',
       'contact_id' => $contactIDWithCountryOnlyAddress,
       'location_type_id' => 1,
       'is_primary' => 1,
     ]);
-    $this->callAPISuccess('Address', 'create', [
-      'country_id' => 'MX',
+    $this->createTestEntity('Address', [
+      'country_id:name' => 'MX',
       'contact_id' => $contactIDWithFullAddress,
       'street_address' => 'First on the left after you cross the border',
       'location_type_id' => 1,
       'is_primary' => 1,
     ]);
-    $this->callAPISuccess('Address', 'create', [
-      'country_id' => 'MX',
+    $this->createTestEntity('Address', [
+      'country_id:name' => 'MX',
       'contact_id' => $contactIDWithFullAddress,
       'street_address' => 'A different address',
       'location_type_id' => 2,
@@ -1010,7 +1010,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->createDuplicateIndividuals($overrides);
     $receiveDate = '2017-08-09';
     foreach ($this->ids['Contact'] as $contactID) {
-      $this->callAPISuccess('Contribution', 'create', ['financial_type_id' => 'Donation', 'total_amount' => 5, 'contact_id' => $contactID, 'receive_date' => $receiveDate]);
+      $this->createTestEntity('Contribution', ['financial_type_id:name' => 'Donation', 'total_amount' => 5, 'contact_id' => $contactID, 'receive_date' => $receiveDate]);
       $receiveDate = '2016-08-09';
     }
   }
