@@ -673,6 +673,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    * @dataProvider booleanDataProvider
    */
   public function testAddressMerge(bool $isReverse): void {
+    $this->setSetting('deduper_resolver_address', 'preferred_contact');
     $this->createDuplicateDonors();
     $this->createTestEntity('Address', [
       'contact_id' => $this->ids['Contact'][0],
@@ -734,6 +735,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    * @dataProvider booleanDataProvider
    */
   public function testBatchMergeResolvableConflictPostalSuffixExists(bool $isReverse): void {
+    $this->setSetting('deduper_resolver_address', 'preferred_contact');
     $this->createDuplicateDonors();
     $contactIDWithPostalSuffix = ($isReverse ? $this->ids['Contact'][1] : $this->ids['Contact'][0]);
     $contactIDWithOutPostalSuffix = ($isReverse ? $this->ids['Contact'][0] : $this->ids['Contact'][1]);
@@ -771,6 +773,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    * @dataProvider booleanDataProvider
    */
   public function testBatchMergeResolvableConflictCountryVsFullAddress(bool $isReverse): void {
+    $this->setSetting('deduper_resolver_address', 'preferred_contact');
     $this->createDuplicateDonors();
     $contactIDWithCountryOnlyAddress = ($isReverse ? $this->ids['Contact'][1] : $this->ids['Contact'][0]);
     $contactIDWithFullAddress = ($isReverse ? $this->ids['Contact'][0] : $this->ids['Contact'][1]);
