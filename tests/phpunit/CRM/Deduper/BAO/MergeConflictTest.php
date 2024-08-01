@@ -580,8 +580,8 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    * @dataProvider booleanDataProvider
    */
   public function testResolvePreferredContactField(bool $isReverse): void {
-    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_field_prefer_preferred_contact' => ['source']]);
-    $this->callAPISuccess('Setting', 'create', ['deduper_resolver_preferred_contact_resolution' => ['earliest_created_contact']]);
+    $this->setSetting('deduper_resolver_field_prefer_preferred_contact', ['source']);
+    $this->setSetting('deduper_resolver_preferred_contact_resolution', ['earliest_created_contact']);
     $this->createDuplicateIndividuals([['contact_source' => 'keep me'], ['contact_source' => 'ditch me']]);
     $mergedContact = $this->doMerge($isReverse);
     $this->assertEquals('keep me', $this->callAPISuccessGetValue('Contact', ['return' => 'contact_source', 'id' => $mergedContact['id']]));
