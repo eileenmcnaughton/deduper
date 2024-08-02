@@ -466,10 +466,10 @@ class CRM_Deduper_BAO_MergeHandler {
    *  Merge context passed in from core -usually form or batch.
    * @param bool $isSafeMode
    */
-  public function __construct($dedupeData, $mainID, $otherID, $context, $isSafeMode) {
+  public function __construct(array $dedupeData, int $mainID, int $otherID, string $context, bool $isSafeMode) {
     $this->setDedupeData($dedupeData);
-    $this->setMainID((int) $mainID);
-    $this->setOtherID((int) $otherID);
+    $this->setMainID($mainID);
+    $this->setOtherID($otherID);
     $this->setContext($context);
     $this->setSafeMode($isSafeMode);
   }
@@ -927,7 +927,7 @@ class CRM_Deduper_BAO_MergeHandler {
    *
    * @return array
    */
-  public function getAllConflictsForEntity($entity): array {
+  public function getAllConflictsForEntity(string $entity): array {
     $conflicts = [];
     foreach ($this->getFieldsInConflict() as $conflictedField) {
       if (strpos($conflictedField, 'location_' . $entity) === 0) {
@@ -1194,7 +1194,7 @@ class CRM_Deduper_BAO_MergeHandler {
       $locationsToChooseFrom = explode(CRM_Core_DAO::VALUE_SEPARATOR, $locationsToChooseFrom);
     }
     $availableOrderedLocations = array_diff($locationsToChooseFrom, $this->getLocationsInUse($locationEntity));
-    return (int) ($availableOrderedLocations[0] ?? 0);
+    return (int) (reset($availableOrderedLocations) ?: 0);
   }
 
   /**
