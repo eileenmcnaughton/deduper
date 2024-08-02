@@ -70,15 +70,6 @@ class CRM_Deduper_BAO_MergeHandler {
   }
 
   /**
-   * List of email fields in conflict, indexed by block number.
-   *
-   * @var array
-   * @deprecated
-   *  This is a subset of the information in emailConflictsDetails
-   */
-  protected array $emailConflicts = [];
-
-  /**
    * Details of email conflicts including:
    *  - fields
    *  - to_keep
@@ -89,17 +80,6 @@ class CRM_Deduper_BAO_MergeHandler {
   protected array $emailConflictDetails = [];
 
   /**
-   * List of address fields in conflict, indexed by block number.
-   *
-   * @var array
-   *
-   * @deprecated
-   * This is a subset of the information in addressConflictsDetails
-   *
-   */
-  protected array $addressConflicts = [];
-
-  /**
    * Details of address conflicts including:
    *  - fields
    *  - to_keep
@@ -108,16 +88,6 @@ class CRM_Deduper_BAO_MergeHandler {
    * @var array
    */
   protected array $addressConflictDetails = [];
-
-  /**
-   * List of phone fields in conflict, indexed by block number.
-   *
-   * @var array
-   *
-   * @deprecated
-   *  This is a subset of the information in phoneConflictsDetails
-   */
-  protected array $phoneConflicts = [];
 
   /**
    * Details of phone conflicts including:
@@ -589,10 +559,10 @@ class CRM_Deduper_BAO_MergeHandler {
    * @param string $value
    */
   public function setResolvedLocationValue(string $fieldName, string $entity, int $block, string $value) {
-    $key = $entity . 'Conflicts';
-    unset($this->$key[$block][$fieldName]);
+    $key = $entity . 'ConflictDetails';
+    unset($this->$key[$block]['fields'][$fieldName]);
     $this->locationConflictResolutions[$entity][$block][$fieldName] = $value;
-    if (empty($this->$key[$block]) || array_keys($this->$key[$block]) === ['display']) {
+    if (empty($this->$key[$block]['fields']) || array_keys($this->$key[$block]['fields']) === ['display']) {
       $this->resolveConflictsOnLocationBlock($entity, $block);
     }
   }
@@ -609,17 +579,17 @@ class CRM_Deduper_BAO_MergeHandler {
     $this->locationConflictResolutions[$location][$block][$fieldName] = $value;
     $mainBlock = &$this->dedupeData['migration_info']['main_details']['location_blocks']['address'][$block];
     $otherBlock = &$this->dedupeData['migration_info']['other_details']['location_blocks']['address'][$block];
-    unset($this->addressConflicts[$block][$fieldName]);
+    unset($this->addressConflictDetails[$block]['fields'][$fieldName]);
 
-    if (!empty($this->addressConflicts[$block]['display'])) {
+    if (!empty($this->addressConflictDetails[$block]['fields']['display'])) {
       $mainDisplay = CRM_Utils_Address::format(array_merge($mainBlock, [$fieldName => $value]));
       $otherDisplay = CRM_Utils_Address::format(array_merge($otherBlock, [$fieldName => $value]));
       if ($mainDisplay === $otherDisplay) {
-        unset($this->addressConflicts[$block]['display']);
+        unset($this->addressConflictDetails[$block]['fields']['display']);
       }
     }
 
-    if (empty($this->addressConflicts[$block])) {
+    if (empty($this->addressConflictDetails[$block]['fields'])) {
       $this->resolveConflictsOnLocationBlock($location, $block);
     }
   }
@@ -888,7 +858,6 @@ class CRM_Deduper_BAO_MergeHandler {
         }
       }
     }
-    $this->phoneConflicts[$blockNumber] = ($this->phoneConflictDetails[$blockNumber]['fields'] ?? []);
     return $this->phoneConflictDetails[$blockNumber];
   }
 
