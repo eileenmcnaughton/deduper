@@ -73,36 +73,75 @@ class CRM_Deduper_BAO_MergeHandler {
    * List of email fields in conflict, indexed by block number.
    *
    * @var array
+   * @deprecated
+   *  This is a subset of the information in emailConflictsDetails
    */
-  protected $emailConflicts = [];
+  protected array $emailConflicts = [];
+
+  /**
+   * Details of email conflicts including:
+   *  - fields
+   *  - to_keep
+   *  - to_remove
+   *
+   * @var array
+   */
+  protected array $emailConflictDetails = [];
 
   /**
    * List of address fields in conflict, indexed by block number.
    *
    * @var array
+   *
+   * @deprecated
+   * This is a subset of the information in addressConflictsDetails
+   *
    */
-  protected $addressConflicts = [];
+  protected array $addressConflicts = [];
+
+  /**
+   * Details of address conflicts including:
+   *  - fields
+   *  - to_keep
+   *  - to_remove
+   *
+   * @var array
+   */
+  protected array $addressConflictDetails = [];
 
   /**
    * List of phone fields in conflict, indexed by block number.
    *
    * @var array
+   *
+   * @deprecated
+   *  This is a subset of the information in phoneConflictsDetails
    */
-  protected $phoneConflicts = [];
+  protected array $phoneConflicts = [];
+
+  /**
+   * Details of phone conflicts including:
+   *  - fields
+   *  - to_keep
+   *  - to_remove
+   *
+   * @var array
+   */
+  protected array $phoneConflictDetails = [];
 
   /**
    * Location blocks that should be deleted on merge.
    *
    * @var array
    */
-  protected $locationBlocksToDelete = [];
+  protected array $locationBlocksToDelete = [];
 
   /**
    * Temporary stash of settings.
    *
    * @var array
    */
-  protected $settings = [];
+  protected array $settings = [];
 
   /**
    * Getter for dedupe Data.
@@ -778,13 +817,22 @@ class CRM_Deduper_BAO_MergeHandler {
    * @param int $emailBlockNumber
    *
    * @return array
-   *   Conflicts in emails.
+   *   List of fields with conflicts against the email in the provided block number for the contact to delete..
    */
   public function getEmailConflicts(int $emailBlockNumber):array {
-    if (!isset($this->emailConflicts[$emailBlockNumber])) {
-      $mainContactEmail = $this->dedupeData['migration_info']['main_details']['location_blocks']['email'][$emailBlockNumber];
-      $otherContactEmail = $this->dedupeData['migration_info']['other_details']['location_blocks']['email'][$emailBlockNumber];
-      $this->emailConflicts[$emailBlockNumber] = [];
+    return $this->getEmailConflictDetails($emailBlockNumber)['fields'];
+  }
+
+  /**
+   * @param int $emailBlockNumber
+   *
+   * @return array
+   */
+  public function getEmailConflictDetails(int $emailBlockNumber): array {
+    if (!isset($this->emailConflictDetails[$emailBlockNumber])) {
+      $otherContactEmail = $this->getBlockForEntity('email', $emailBlockNumber, FALSE);
+      $mainContactEmail = $this->getBlockForEntity('email', $emailBlockNumber, TRUE);
+      $this->emailConflictDetails[$emailBlockNumber] = [];
       // As defined in CRM_Dedupe_Merger::ignoredFields + display which is for the form layer.
       $keysToIgnore = [
         'id',
@@ -801,26 +849,26 @@ class CRM_Deduper_BAO_MergeHandler {
           isset($mainContactEmail[$field])
           && $mainContactEmail[$field] !== $value
           && !in_array($field, $keysToIgnore, TRUE)) {
-          $this->emailConflicts[$emailBlockNumber][$field] = $value;
+          $this->emailConflictDetails[$emailBlockNumber]['fields'][$field] = $value;
+          $this->emailConflictDetails[$emailBlockNumber]['to_keep'] = $mainContactEmail;
+          $this->emailConflictDetails[$emailBlockNumber]['to_remove'] = $otherContactEmail;
         }
       }
     }
-    return $this->emailConflicts[$emailBlockNumber];
+    $this->emailConflicts[$emailBlockNumber] = ($this->emailConflictDetails[$emailBlockNumber]['fields'] ?? []);
+    return $this->emailConflictDetails[$emailBlockNumber];
   }
 
   /**
-   * Get conflicts for the phone of the given block.
-   *
    * @param int $blockNumber
    *
    * @return array
-   *   Conflicts in emails.
    */
-  public function getPhoneConflicts(int $blockNumber):array {
-    if (!isset($this->phoneConflicts[$blockNumber])) {
-      $mainContactEntity = $this->dedupeData['migration_info']['main_details']['location_blocks']['phone'][$blockNumber];
-      $otherContactEntity = $this->dedupeData['migration_info']['other_details']['location_blocks']['phone'][$blockNumber];
-      $this->phoneConflicts[$blockNumber] = [];
+  public function getPhoneConflictDetails(int $blockNumber): array {
+    if (!isset($this->phoneConflictDetails[$blockNumber])) {
+      $mainContactEntity = $this->getBlockForEntity('phone', $blockNumber, TRUE);
+      $otherContactEntity = $this->getBlockForEntity('phone', $blockNumber, FALSE);
+      $this->phoneConflictDetails[$blockNumber] = [];
       // As defined in CRM_Dedupe_Merger::ignoredFields + display which is for the form layer.
       $keysToIgnore = [
         'id',
@@ -834,11 +882,26 @@ class CRM_Deduper_BAO_MergeHandler {
           isset($mainContactEntity[$field])
           && $mainContactEntity[$field] !== $value
           && !in_array($field, $keysToIgnore, TRUE)) {
-          $this->phoneConflicts[$blockNumber][$field] = $value;
+          $this->phoneConflictDetails[$blockNumber]['fields'][$field] = $value;
+          $this->phoneConflictDetails[$blockNumber]['to_keep'] = $mainContactEntity;
+          $this->phoneConflictDetails[$blockNumber]['to_remove'] = $otherContactEntity;
         }
       }
     }
-    return $this->phoneConflicts[$blockNumber];
+    $this->phoneConflicts[$blockNumber] = ($this->phoneConflictDetails[$blockNumber]['fields'] ?? []);
+    return $this->phoneConflictDetails[$blockNumber];
+  }
+
+  /**
+   * Get conflicts for the phone of the given block.
+   *
+   * @param int $blockNumber
+   *
+   * @return array
+   *   Conflicts in emails.
+   */
+  public function getPhoneConflicts(int $blockNumber):array {
+    return $this->getPhoneConflictDetails($blockNumber)['fields'];
   }
 
   /**
@@ -892,10 +955,19 @@ class CRM_Deduper_BAO_MergeHandler {
    *   Conflicts in addresses.
    */
   public function getAddressConflicts(int $blockNumber):array {
-    if (!isset($this->addressConflicts[$blockNumber])) {
-      $mainContactAddress = $this->dedupeData['migration_info']['main_details']['location_blocks']['address'][$blockNumber];
-      $otherContactAddress = $this->dedupeData['migration_info']['other_details']['location_blocks']['address'][$blockNumber];
-      $this->addressConflicts[$blockNumber] = [];
+    return $this->getAddressConflictDetails($blockNumber)['fields'];
+  }
+
+  /**
+   * @param int $blockNumber
+   *
+   * @return array
+   */
+  public function getAddressConflictDetails(int $blockNumber): array {
+    if (!isset($this->addressConflictDetails[$blockNumber])) {
+      $mainContactAddress = $this->getBlockForEntity('address', $blockNumber, TRUE);
+      $otherContactAddress = $this->getBlockForEntity('address', $blockNumber, FALSE);
+      $this->addressConflictDetails[$blockNumber] = [];
       // As defined in CRM_Dedupe_Merger::ignoredFields + display which is for the form layer.
       $keysToIgnore = [
         'id',
@@ -909,11 +981,13 @@ class CRM_Deduper_BAO_MergeHandler {
           isset($mainContactAddress[$field])
           && $mainContactAddress[$field] !== $value
           && !in_array($field, $keysToIgnore, TRUE)) {
-          $this->addressConflicts[$blockNumber][$field] = $value;
+          $this->addressConflictDetails[$blockNumber]['fields'][$field] = $value;
+          $this->addressConflictDetails[$blockNumber]['to_keep'] = $mainContactAddress;
+          $this->addressConflictDetails[$blockNumber]['to_remove'] = $otherContactAddress;
         }
       }
     }
-    return $this->addressConflicts[$blockNumber];
+    return $this->addressConflictDetails[$blockNumber];
   }
 
   /**
@@ -1121,6 +1195,31 @@ class CRM_Deduper_BAO_MergeHandler {
     }
     $availableOrderedLocations = array_diff($locationsToChooseFrom, $this->getLocationsInUse($locationEntity));
     return (int) ($availableOrderedLocations[0] ?? 0);
+  }
+
+  /**
+   * @param string $entity
+   * @param int $blockNumber
+   * @param bool $isContactToKeep
+   *
+   * @return mixed
+   */
+  public function getBlockForEntity(string $entity, int $blockNumber, bool $isContactToKeep) {
+    if (!$isContactToKeep) {
+      return $this->dedupeData['migration_info']['other_details']['location_blocks'][$entity][$blockNumber];
+    }
+    $otherContactEntity = $this->getBlockForEntity($entity, $blockNumber, FALSE);
+    foreach ($this->dedupeData['migration_info']['main_details']['location_blocks'][$entity] as $details) {
+      // The block number may not be the same so we need to find the email on the main.
+      // It is possible they have more than one of the location type, so get the first one
+      // which does not have the same email.
+      if ((int) $details['location_type_id'] === (int) $otherContactEntity['location_type_id']
+        && $details['display'] !== $otherContactEntity['display']
+      ) {
+        return $details;
+      }
+    }
+    return [];
   }
 
 }
