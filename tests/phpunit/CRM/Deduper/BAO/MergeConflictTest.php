@@ -935,6 +935,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
       'last_name' => 'Smith',
       'contact_type' => 'Individual',
       'email_primary.email' => 'bob@example.com',
+      'phone_primary.phone' => 123,
     ];
     foreach ($contactParams as $index => $contactParam) {
       $contactParam = array_merge($params, $contactParam);
