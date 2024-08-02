@@ -95,14 +95,14 @@ class CRM_Deduper_BAO_MergeHandler {
    *
    * @var array
    */
-  protected $locationBlocksToDelete = [];
+  protected array $locationBlocksToDelete = [];
 
   /**
    * Temporary stash of settings.
    *
    * @var array
    */
-  protected $settings = [];
+  protected array $settings = [];
 
   /**
    * Getter for dedupe Data.
