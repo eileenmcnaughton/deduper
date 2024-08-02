@@ -1194,7 +1194,7 @@ class CRM_Deduper_BAO_MergeHandler {
       $locationsToChooseFrom = explode(CRM_Core_DAO::VALUE_SEPARATOR, $locationsToChooseFrom);
     }
     $availableOrderedLocations = array_diff($locationsToChooseFrom, $this->getLocationsInUse($locationEntity));
-    return (int) ($availableOrderedLocations[0] ?? 0);
+    return (int) (reset($availableOrderedLocations) ?: 0);
   }
 
   /**
