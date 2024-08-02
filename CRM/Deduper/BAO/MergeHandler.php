@@ -9,21 +9,21 @@ class CRM_Deduper_BAO_MergeHandler {
    *
    * @var array
    */
-  protected $dedupeData = [];
+  protected array $dedupeData = [];
 
   /**
    * Location blocks as calculated by the merge code & passed in alterLocationMergeData.
    *
    * @var array
    */
-  protected $locationBlocks = [];
+  protected array $locationBlocks = [];
 
   /**
    * Resolutions to resolvable email conflicts.
    *
    * @var array
    */
-  protected $locationConflictResolutions = [];
+  protected array $locationConflictResolutions = [];
 
   /**
    * Contact ID to retain.
@@ -178,7 +178,7 @@ class CRM_Deduper_BAO_MergeHandler {
   /**
    * Getter for context.
    *
-   * @return mixed
+   * @return string
    */
   public function getContext() {
     return $this->context;
@@ -240,9 +240,9 @@ class CRM_Deduper_BAO_MergeHandler {
   public function getIndividualNameFieldValues(bool $isForContactToBeKept):array {
     $return = [];
     foreach ($this->getIndividualNameFields() as $fieldName) {
-      $return[$fieldName] = trim($this->getValueForField($fieldName, $isForContactToBeKept));
+      $return[$fieldName] = $this->getValueForField($fieldName, $isForContactToBeKept);
     }
-    return $return ;
+    return $return;
   }
 
   /**
@@ -298,9 +298,9 @@ class CRM_Deduper_BAO_MergeHandler {
   public function getNameFieldValues(bool $isForContactToBeKept):array {
     $return = [];
     foreach ($this->getNameFields() as $fieldName) {
-      $return[$fieldName] = trim($this->getValueForField($fieldName, $isForContactToBeKept));
+      $return[$fieldName] = $this->getValueForField($fieldName, $isForContactToBeKept);
     }
-    return $return ;
+    return $return;
   }
 
   /**
@@ -315,17 +315,23 @@ class CRM_Deduper_BAO_MergeHandler {
   public function getValueForField(string $fieldName, bool $isForContactToBeKept) {
     if (strpos($fieldName, 'custom_') !== 0) {
       $contactDetail = $isForContactToBeKept ? $this->dedupeData['migration_info']['main_details'] : $this->dedupeData['migration_info']['other_details'];
-      return $contactDetail[$fieldName] ?? NULL;
+      $value = $contactDetail[$fieldName] ?? NULL;
     }
     // You are now entering hell. The information you want is buried... somewhere.
-    if (!$isForContactToBeKept) {
+    elseif (!$isForContactToBeKept) {
       // This is what would be 'just used' if we unset the conflict & leave 'move_custom_x' in the array
       // so if should be safe-ish.
-      return $this->dedupeData['migration_info']['move_' . $fieldName];
+      $value = $this->dedupeData['migration_info']['move_' . $fieldName];
     }
-    // Honestly let's try passing back this formatted value .... because it IS deformatted at the other end.
-    // We relying on unit tests & magic here.
-    return $this->dedupeData['migration_info']['rows']['move_' . $fieldName]['main'];
+    else {
+      // Honestly let's try passing back this formatted value .... because it IS deformatted at the other end.
+      // We relying on unit tests & magic here.
+      $value = $this->dedupeData['migration_info']['rows']['move_' . $fieldName]['main'];
+    }
+    if (is_string($value)) {
+      return trim($value);
+    }
+    return $value;
   }
 
   /**
@@ -393,7 +399,6 @@ class CRM_Deduper_BAO_MergeHandler {
   public function setLocationBlocks(array $locationBlocks) {
     $this->locationBlocks = $locationBlocks;
   }
-
 
   /**
    * @return array
@@ -591,7 +596,7 @@ class CRM_Deduper_BAO_MergeHandler {
    *   If not null the primary will be forced to this.
    */
   public function relocateLocation(string $locationEntity, int $block, $isContactToKeep = FALSE, $isPrimary = NULL): void {
-    $locationTypeID =  $this->getNextAvailableLocationType($locationEntity);
+    $locationTypeID = $this->getNextAvailableLocationType($locationEntity);
     if ($isContactToKeep) {
       // The CiviCRM form has no way to do this - we are kind of tricking it into thinking it is dealing with another
       // address on the contact to be changed.
@@ -863,7 +868,7 @@ class CRM_Deduper_BAO_MergeHandler {
     $conflicts = [];
     foreach ($this->getFieldsInConflict() as $conflictedField) {
       if (strpos($conflictedField, 'location_' . $entity) === 0) {
-        $blockNumber = intval(str_replace('location_' .  $entity . '_', '', $conflictedField));
+        $blockNumber = (int) (str_replace('location_' . $entity . '_', '', $conflictedField));
         if ($entity === 'email') {
           $conflicts[$blockNumber] = $this->getEmailConflicts($blockNumber);
         }
