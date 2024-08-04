@@ -1187,11 +1187,14 @@ class CRM_Deduper_BAO_MergeHandler {
     }
     $otherContactEntity = $this->getBlockForEntity($entity, $blockNumber, FALSE);
     foreach ($this->dedupeData['migration_info']['main_details']['location_blocks'][$entity] as $details) {
-      // The block number may not be the same so we need to find the email on the main.
+      // The block number may not be the same, so we need to find the email on the main.
       // It is possible they have more than one of the location type, so get the first one
       // which does not have the same email.
       if ((int) $details['location_type_id'] === (int) $otherContactEntity['location_type_id']
-        && $details['display'] !== $otherContactEntity['display']
+        && (
+          ($entity === 'phone' && $details['phone'] !== $otherContactEntity['phone'])
+          || $details['display'] !== $otherContactEntity['display']
+        )
       ) {
         return $details;
       }
