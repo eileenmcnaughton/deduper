@@ -674,7 +674,7 @@ class CRM_Deduper_BAO_MergeHandler {
    * @return bool
    */
   public function isBlockEquivalent($locationEntity, $entity1, $entity2) {
-    return $entity1['display'] === $entity2['display'];
+    return $locationEntity === 'phone' ? ($entity1['phone_numeric'] === $entity2['phone_numeric']) : ($entity1['display'] === $entity2['display']);
   }
 
   /**
