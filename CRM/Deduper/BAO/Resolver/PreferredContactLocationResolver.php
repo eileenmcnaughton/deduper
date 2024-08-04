@@ -114,7 +114,6 @@ class CRM_Deduper_BAO_Resolver_PreferredContactLocationResolver extends CRM_Dedu
   protected function resolveLocationsPreferringContactToRemove($entity): void {
     $conflicts = $this->getAllConflictsForEntity($entity);
     $entitiesContactToDelete = $this->getLocationEntities($entity, FALSE);
-    $entitiesContactToKeep = $this->getLocationEntities($entity, TRUE);
     // Make sure their addresses take precedence and any from the other contact get new locations, if needed.
     if (!empty($conflicts)) {
       foreach ($conflicts as $block => $blockConflicts) {
