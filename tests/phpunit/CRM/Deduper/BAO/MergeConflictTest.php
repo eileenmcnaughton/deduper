@@ -2,6 +2,7 @@
 
 use Civi\Api4\Address;
 use Civi\Api4\OptionValue;
+use Civi\Api4\Phone;
 use Civi\Test\Api3TestTrait;
 use Civi\Api4\Email;
 use Civi\Test\EntityTrait;
@@ -728,6 +729,105 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->assertNotEmpty($address[1]['location_type_id']);
     $this->assertNotEquals($address[0]['location_type_id'], $address[1]['location_type_id']);
     $this->assertEquals('33 Main Street', $address[1]['street_address']);
+  }
+
+  /**
+   * Test handling when 2 addresses with the same details are resolved.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into?
+   *
+   * @throws \CRM_Core_Exception
+   *
+   * @dataProvider booleanDataProvider
+   */
+  public function testAddressMergeWithLocationWrangling(bool $isReverse): void {
+    $this->createDuplicateIndividuals();
+    $this->createTestEntity('LocationType', ['name' => 'Another', 'display_name' => 'Another']);
+    $this->createTestEntity('Contribution', [
+      'receive_date' => 'now',
+      'financial_type_id:name' => 'Donation',
+      'total_amount' => 5,
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+    $this->setSetting('deduper_resolver_preferred_contact_resolution', [
+      'most_recent_contributor',
+    ]);
+    $this->setSetting('deduper_location_priority_order', [
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Billing'),
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Home'),
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Another'),
+      \CRM_Core_PseudoConstant::getKey('CRM_Core_BAO_Address', 'location_type_id', 'Other'),
+    ]);
+    $this->setSetting('deduper_resolver_email', 'preferred_contact_with_re-assign');
+    $this->setSetting('deduper_resolver_phone', 'preferred_contact_with_re-assign');
+    $this->setSetting('deduper_resolver_address', 'preferred_contact_with_re-assign');
+
+    $this->createTestEntity('Email', [
+      'location_type_id:name' => 'Billing',
+      'email' => 'move_mail1@example.com',
+      'contact_id' => $this->ids['Contact'][0],
+    ]);
+    $this->createTestEntity('Email', [
+      'location_type_id:name' => 'Billing',
+      'email' => 'move_mail0@example.com',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+    $this->createTestEntity('Email', [
+      'location_type_id:name' => 'Another',
+      'email' => 'mail_3@example.com',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+
+    $this->createTestEntity('Phone', [
+      'location_type_id:name' => 'Billing',
+      'phone' => '1234',
+      'contact_id' => $this->ids['Contact'][0],
+    ]);
+    $this->createTestEntity('Phone', [
+      'location_type_id:name' => 'Billing',
+      'phone' => '5678',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+    $this->createTestEntity('Phone', [
+      'location_type_id:name' => 'Another',
+      'phone' => '1288',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+
+    $this->createTestEntity('Address', [
+      'location_type_id:name' => 'Billing',
+      'street_address' => '1234 Main St',
+      'contact_id' => $this->ids['Contact'][0],
+    ]);
+    $this->createTestEntity('Address', [
+      'location_type_id:name' => 'Billing',
+      'street_address' => '5678 Main St',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+    $this->createTestEntity('Address', [
+      'location_type_id:name' => 'Another',
+      'street_address' => '1288 Main St',
+      'contact_id' => $this->ids['Contact'][1],
+    ]);
+
+    $contact = $this->doMerge($isReverse);
+    $emails = Email::get(FALSE)
+      ->addSelect('email', 'location_type_id:name', 'contact_id')
+      ->addWhere('contact_id', '=', $contact['id'])
+      ->execute()->indexBy('location_type_id:name');
+    $this->assertCount(4, $emails);
+    $this->assertEquals('move_mail1@example.com', $emails['Other']['email']);
+
+    $this->assertCount(4, Address::get(FALSE)
+      ->addSelect('street_address', 'location_type_id:name', 'contact_id')
+      ->addWhere('contact_id', '=', $contact['id'])
+      ->execute());
+
+    $this->assertCount(4, Phone::get(FALSE)
+      ->addSelect('phone', 'location_type_id:name', 'contact_id')
+      ->addWhere('contact_id', '=', $contact['id'])
+      ->execute());
   }
 
   /**
