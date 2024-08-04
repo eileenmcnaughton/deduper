@@ -84,7 +84,7 @@ class CRM_Deduper_BAO_Resolver_PreferredContactLocationResolver extends CRM_Dedu
         if ($this->isReHomingRequired($entity, $entitiesContactToDelete[$block], $block)) {
           $this->relocateLocation($entity, $block, FALSE, FALSE);
         }
-        foreach (array_keys($blockConflicts) as $fieldName) {
+        foreach (array_keys($blockConflicts['fields'] ?? []) as $fieldName) {
           // Keep the value from the contact to keep as that is preferred contact.
           $this->setResolvedLocationValue($fieldName, $entity, $block, $entitiesContactToKeep[$block][$fieldName]);
           if ($block === $primaryBlock && $entitiesContactToDelete[$block]['is_primary'] !== $entitiesContactToKeep[$block]['is_primary']) {
@@ -122,7 +122,7 @@ class CRM_Deduper_BAO_Resolver_PreferredContactLocationResolver extends CRM_Dedu
         if ($this->isReHomingRequired($entity, $entitiesContactToKeep[$block], $block)) {
           $this->relocateLocation($entity, $block, TRUE, FALSE);
         }
-        foreach (array_keys($blockConflicts) as $fieldName) {
+        foreach (array_keys($blockConflicts['fields'] ?? []) as $fieldName) {
           // Keep the value from the contact to delete as that is preferred contact.
           $this->setResolvedLocationValue($fieldName, $entity, $block, $entitiesContactToDelete[$block][$fieldName]);
         }

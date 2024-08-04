@@ -862,18 +862,6 @@ class CRM_Deduper_BAO_MergeHandler {
   }
 
   /**
-   * Get conflicts for the phone of the given block.
-   *
-   * @param int $blockNumber
-   *
-   * @return array
-   *   Conflicts in emails.
-   */
-  public function getPhoneConflicts(int $blockNumber):array {
-    return $this->getPhoneConflictDetails($blockNumber)['fields'];
-  }
-
-  /**
    * Get conflicts on all address blocks.
    *
    * @return array
@@ -902,13 +890,13 @@ class CRM_Deduper_BAO_MergeHandler {
       if (strpos($conflictedField, 'location_' . $entity) === 0) {
         $blockNumber = (int) (str_replace('location_' . $entity . '_', '', $conflictedField));
         if ($entity === 'email') {
-          $conflicts[$blockNumber] = $this->getEmailConflicts($blockNumber);
+          $conflicts[$blockNumber] = $this->getEmailConflictDetails($blockNumber);
         }
         if ($entity === 'address') {
-          $conflicts[$blockNumber] = $this->getAddressConflicts($blockNumber);
+          $conflicts[$blockNumber] = $this->getAddressConflictDetails($blockNumber);
         }
         if ($entity === 'phone') {
-          $conflicts[$blockNumber] = $this->getPhoneConflicts($blockNumber);
+          $conflicts[$blockNumber] = $this->getPhoneConflictDetails($blockNumber);
         }
       }
     }
