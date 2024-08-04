@@ -25,7 +25,7 @@ class CRM_Deduper_BAO_Resolver_UninformativeCharactersResolver extends CRM_Dedup
       foreach ($contact1 as $fieldName => $value) {
         if ($this->isStripPunctuationForField($fieldName, $contact1, $contact2)) {
           $value = str_replace($this->getWhiteSpaceCharacters(), ' ', $value ?: '');
-          $contact2Value = str_replace($this->getWhiteSpaceCharacters(), ' ', $contact2[$fieldName]);
+          $contact2Value = str_replace($this->getWhiteSpaceCharacters(), ' ', $contact2[$fieldName] ?: '');
           // Get rid of any double spaces now created. Perhaps a preg_replace would be better
           // but ... later.
           $value = trim(str_replace('  ', ' ', $value));
