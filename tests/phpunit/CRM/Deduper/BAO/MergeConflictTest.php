@@ -679,6 +679,8 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
   public function testAddressMerge(bool $isReverse): void {
     $this->setSetting('deduper_resolver_address', 'preferred_contact');
     $this->createDuplicateDonors();
+    // Delete the generic addresses & create the ones for this test.
+    Address::delete(FALSE)->addWhere('contact_id', 'IN', $this->ids['Contact'])->execute();
     $this->createTestEntity('Address', [
       'contact_id' => $this->ids['Contact'][0],
       'street_address' => '意外だね42意外だね',
@@ -737,10 +739,13 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    *   Should we reverse which contact we merge into?
    *
    * @dataProvider booleanDataProvider
+   * @throws \CRM_Core_Exception
    */
   public function testBatchMergeResolvableConflictPostalSuffixExists(bool $isReverse): void {
     $this->setSetting('deduper_resolver_address', 'preferred_contact');
     $this->createDuplicateDonors();
+    // Delete the generic addresses & create the ones for this test.
+    Address::delete(FALSE)->addWhere('contact_id', 'IN', $this->ids['Contact'])->execute();
     $contactIDWithPostalSuffix = ($isReverse ? $this->ids['Contact'][1] : $this->ids['Contact'][0]);
     $contactIDWithOutPostalSuffix = ($isReverse ? $this->ids['Contact'][0] : $this->ids['Contact'][1]);
     $this->createTestEntity('Address', [
@@ -936,6 +941,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
       'contact_type' => 'Individual',
       'email_primary.email' => 'bob@example.com',
       'phone_primary.phone' => 123,
+      'address_primary.street_address' => 'Home sweet home',
     ];
     foreach ($contactParams as $index => $contactParam) {
       $contactParam = array_merge($params, $contactParam);
