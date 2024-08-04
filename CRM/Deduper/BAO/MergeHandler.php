@@ -293,7 +293,17 @@ class CRM_Deduper_BAO_MergeHandler {
    * @return array
    */
   public function getAddressBlock(bool $isForContactToBeKept, int $blockNumber):array {
-    return $this->getAddresses($isForContactToBeKept)[$blockNumber];
+    if ($isForContactToBeKept) {
+      $otherContactAddress = $this->getAddresses(FALSE)[$blockNumber];
+      foreach ($this->getAddresses(TRUE) as $address) {
+        if (((int) $address['location_type_id']) === ((int) $otherContactAddress['location_type_id'])) {
+          return $address;
+        }
+      }
+    }
+    else {
+      return $this->getAddresses(FALSE)[$blockNumber];
+    }
   }
 
   /**
