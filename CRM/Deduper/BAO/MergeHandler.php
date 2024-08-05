@@ -761,6 +761,7 @@ class CRM_Deduper_BAO_MergeHandler {
     else {
       return $this->dedupeData['migration_info']['other_details']['location_blocks'][$location][$block] ?? [];
     }
+    return [];
   }
 
   /**
