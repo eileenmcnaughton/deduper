@@ -6,10 +6,10 @@ use CRM_Deduper_ExtensionUtil as E;
 use Civi\Api4\Email;
 use Civi\Api4\Phone;
 use Civi\Api4\Address;
-
+use Civi\Api4\Service\Spec\Provider\ContactFullNameSpecProvider;
 
 // checking if the file exists allows compilation elsewhere if desired.
-if (file_exists( __DIR__ . '/vendor/autoload.php')) {
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
   require_once __DIR__ . '/vendor/autoload.php';
 }
 
@@ -352,13 +352,19 @@ function deduper_civicrm_alterLocationMergeData(&$blocksDAO, $mainId, $otherId, 
  */
 function deduper_civicrm_container($container) {
   $container->setDefinition('cache.dedupe_pairs', new Definition(
-    'CRM_Utils_Cache_Interface',
-    [[
-      'type' => ['*memory*', 'ArrayCache'],
-      'name' => 'dedupe_pairs',
-      'withArray' => 'fast',
-    ]]
+    'CRM_Utils_Cache_Interface', [
+      [
+        'type' => ['*memory*', 'ArrayCache'],
+        'name' => 'dedupe_pairs',
+        'withArray' => 'fast',
+      ],
+    ]
   ))->setPublic(TRUE)->setFactory('CRM_Utils_Cache::create');
+
+  $container->setDefinition('civi.api.prepare', new Definition(
+    ContactFullNameSpecProvider::class,
+    []
+  ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
 }
 
 /**
