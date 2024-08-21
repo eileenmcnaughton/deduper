@@ -62,9 +62,9 @@ class ContactFullNameSpecProvider extends AutoSubscriber implements SpecProvider
       foreach ($parameters['records'] as $index => $values) {
         $fullName = $values['full_name'] ?? $defaultName;
         if ($fullName) {
-          $parameters['records'][$index] = $this->addParsedName($fullName, $values);
+          $parameters['records'][$index] = $this->addParsedName($this->cleanString((string) $fullName, 128), $values);
         }
-        unset($parameters['records'][$index]['full_name']);
+        unset($parameters['records'][$index]['full_name'], $values['full_name']);
       }
       $apiRequest->setRecords($parameters['records']);
       if ($defaultName) {

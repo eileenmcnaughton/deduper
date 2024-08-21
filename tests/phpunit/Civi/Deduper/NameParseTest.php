@@ -134,6 +134,17 @@ class NameParseTest extends TestCase implements HeadlessInterface, HookInterface
       ->execute()->single();
     $this->assertEquals('Bobby', $contact['first_name']);
     $this->assertEquals('Customized', $contact['addressee_id:name']);
+
+    Contact::save(FALSE)
+      ->setRecords([['id' => $individual['id'], 'full_name' => 'Bobby Smith']])
+      ->execute();
+
+    $contact = Contact::get(FALSE)
+      ->addSelect('first_name', 'addressee_id:name')
+      ->addWhere('id', '=', $individual['id'])
+      ->execute()->single();
+    $this->assertEquals('Bobby', $contact['first_name']);
+    $this->assertEquals('Customized', $contact['addressee_id:name']);
   }
 
 }
