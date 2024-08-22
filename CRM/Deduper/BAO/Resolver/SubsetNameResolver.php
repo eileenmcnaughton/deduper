@@ -11,8 +11,8 @@ class CRM_Deduper_BAO_Resolver_SubsetNameResolver extends CRM_Deduper_BAO_Resolv
    * @throws \CRM_Core_Exception
    */
   public function resolveConflicts() {
-    $fields = $this->getSetting('deduper_subset_name_handling');
-    $strings = explode(',', $this->getSetting('deduper_subset_name_handling_abort_strings'));
+    $fields = (array) $this->getSetting('deduper_subset_name_handling');
+    $strings = explode(',', (string) $this->getSetting('deduper_subset_name_handling_abort_strings'));
     foreach ($fields as $field) {
       if (!$this->isFieldInConflict($field)) {
         continue;
