@@ -301,17 +301,50 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    *
    * @param bool $isReverse
    *   Should we reverse which contact we merge into?
+   * @param array $contact1
+   * @param array $contact2
    *
-   * @dataProvider booleanDataProvider
+   * @dataProvider initialDataProvider
    */
-  public function testInitialResolutionInitialWithCasingConflict(bool $isReverse): void {
-    $this->createDuplicateIndividuals([['last_name' => 'M SMITH'], []]);
+  public function testInitialResolutionInitialWithCasingConflict(bool $isReverse, array $contact1, array $contact2): void {
+    $this->createDuplicateIndividuals([$contact1, $contact2]);
     $mergedContact = $this->doMerge($isReverse);
     $this->assertEquals('Bob', $mergedContact['first_name']);
     $this->assertEquals('Smith', $mergedContact['last_name']);
     $this->assertEquals('M', $mergedContact['middle_name']);
   }
 
+  public function initialDataProvider(): array {
+    return [
+      'M SMITH' => [FALSE, 'contact_1' => ['last_name' => 'M SMITH'], 'contact_2' => []],
+      'M SMITH_' => [TRUE, 'contact_1' => ['last_name' => 'M SMITH'], 'contact_2' => []],
+      'm Smith' => [FALSE, 'contact_1' => ['last_name' => 'm Smith'], 'contact_2' => ['middle_name' => 'M']],
+      'm Smith_' => [TRUE, 'contact_1' => ['last_name' => 'm Smith'], 'contact_2' => ['middle_name' => 'M']],
+      'Bob m' => [FALSE, 'contact_1' => ['first_name' => 'Bob m'], 'contact_2' => []],
+      'Bob m_' => [TRUE, 'contact_1' => ['first_name' => 'Bob m'], 'contact_2' => []],
+      'Bob m to M' => [FALSE, 'contact_1' => ['first_name' => 'Bob m'], 'contact_2' => ['middle_name' => 'M']],
+      'Bob m to M_' => [TRUE, 'contact_1' => ['first_name' => 'Bob m'], 'contact_2' => ['middle_name' => 'M']],
+    ];
+  }
+
+  /**
+   * Test resolving an initial in the last name when casing varies.
+   *
+   * ie. middle name = M last name = Smith should merge with last
+   * name = M Smith.
+   *
+   * @param bool $isReverse
+   *   Should we reverse which contact we merge into?
+   *
+   * @dataProvider booleanDataProvider
+   */
+  public function testInitialResolutionInLastMisCased(bool $isReverse) {
+    $this->createDuplicateIndividuals([['last_name' => 'm Smith'], ['middle_name' => 'M']]);
+    $mergedContact = $this->doMerge($isReverse);
+    $this->assertEquals('Bob', $mergedContact['first_name']);
+    $this->assertEquals('M', $mergedContact['middle_name']);
+    $this->assertEquals('Smith', $mergedContact['last_name']);
+  }
   /**
    * Test resolving an initial in the first name when the other contact already has the same value as an initial
    *
@@ -728,6 +761,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
       'city' => '意外だね',
       'postal_code' => 310027,
       'country_id:name' => 'China',
+      'state_province_id:name' => 'Beijing',
     ], 'contact_1_main');
 
     $this->createTestEntity('Address', [
@@ -736,7 +770,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
       'is_billing' => TRUE,
       'location_type_id:name' => 'Other',
       'city' => 'Mega-ville',
-      'state_province_id:name' => 'CA',
+      'state_province_id:name' => 'California',
       'postal_code' => 90201,
       'country_id:name' => 'United States',
     ], 'contact_2_other');
@@ -746,6 +780,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
     $this->createTestEntity('Address', [
       'contact_id' => $this->ids['Contact'][1],
       'street_address' => 'Home sweet home',
+      'supplemental_address_1' => 'something',
       'is_billing' => TRUE,
       'is_primary' => TRUE,
       'location_type_id:name' => 'Home',
@@ -757,15 +792,19 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
 
     $address = Address::get(FALSE)
       ->addWhere('contact_id', '=', $contact['id'])
-      ->addSelect('street_address', 'is_primary', 'location_type_id:name', 'location_type_id')
+      ->addSelect('street_address', 'is_primary', 'location_type_id:name', 'location_type_id', 'state_province_id:name', 'supplemental_address_1')
       ->addOrderBy('is_primary', 'DESC')
       ->execute();
     $this->assertCount(2, $address);
     $this->assertEquals('Home', $address[0]['location_type_id:name']);
     $this->assertEquals('意外だね42意外だね', $address[0]['street_address']);
+    $this->assertEmpty($address[0]['supplemental_address_1']);
+    $this->assertEquals('Beijing', $address[0]['state_province_id:name']);
     $this->assertNotEmpty($address[1]['location_type_id']);
     $this->assertNotEquals($address[0]['location_type_id'], $address[1]['location_type_id']);
     $this->assertEquals('33 Main Street', $address[1]['street_address']);
+    $this->assertEmpty($address[1]['supplemental_address_1']);
+    $this->assertEquals('California', $address[1]['state_province_id:name']);
   }
 
   /**
