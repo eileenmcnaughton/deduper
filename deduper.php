@@ -274,7 +274,7 @@ function deduper_civicrm_merge($type, &$refs, $mainId, $otherId, $tables) {
 
     case 'batch':
     case 'form':
-      if (in_array($type, ['form', 'batch'])) {
+      if (in_array($type, ['form', 'batch'], TRUE)) {
         Civi::log($type . '_merge')->debug(
           'Deduping contacts {contactKeptID} and {contactDeletedID}. Mode = {mode}', [
           'contactKeptID' => $mainId,
