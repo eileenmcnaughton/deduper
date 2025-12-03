@@ -2,6 +2,8 @@
 
 use Civi\Api4\Contact;
 use Civi\Api4\Contribution;
+use Civi\Api4\CustomField;
+use Civi\Api4\CustomGroup;
 use Civi\Test\Api3TestTrait;
 use Civi\Test\HeadlessInterface;
 use Civi\Test\HookInterface;
@@ -42,6 +44,11 @@ class DedupeBaseTestClass extends \PHPUnit\Framework\TestCase implements Headles
           ->addWhere('id', 'IN', $this->ids['Contact'])
           ->setUseTrash(FALSE)
           ->execute();
+      }
+      if ($entity === 'CustomGroup') {
+       CustomField::delete(FALSE)->addWhere('custom_group_id', 'IN', $this->ids['CustomGroup'])->execute();
+       CustomGroup::delete(FALSE)->addWhere('id', 'IN', $this->ids['CustomGroup'])->execute();
+
       }
     }
     foreach ($this->settings as $key => $value) {
