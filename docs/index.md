@@ -13,9 +13,11 @@ Provides tools for deduping
 
 ### Deduper interface
 
-- Deduper screen - this is an angular screen that allows you to search for duplicates using nuanced criteria. You can dedupe from this screen.
+- Deduper screen - this is thescreen that allows you to search for duplicates using nuanced criteria. You can dedupe from this screen.
   This can be found under the contacts menu.
   ![Deduper Screen](images/Deduper.png?raw=true "Deduper screen")
+- Hitting the 'safe merge' button will merge if all conflicts are resolved or show you the conflicts, giving you the option to edit or merge.
+  ![Conflicts when merging](images/conflict_on_merge.png "Conflicts when merging")
 
 ### Resolvers
 
