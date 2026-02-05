@@ -44,7 +44,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    *
    * @throws \CRM_Core_Exception
    */
-  public function testGetBooleanFields() {
+  public function testGetBooleanFields(): void {
     $fields = CRM_Deduper_BAO_MergeConflict::getBooleanFields();
     $this->assertTrue(isset($fields['do_not_mail'], $fields['on_hold']));
     $this->assertFalse(isset($fields['contact_type']));
@@ -96,7 +96,7 @@ class CRM_Deduper_BAO_MergeConflictTest extends DedupeBaseTestClass {
    *
    * @dataProvider booleanDataProvider
    */
-  public function testResolveAggressivePreferredContact(bool $isReverse) {
+  public function testResolveAggressivePreferredContact(bool $isReverse): void {
     $this->setSetting('deduper_resolver_field_prefer_preferred_contact', ['source']);
     $this->setSetting('deduper_resolver_preferred_contact_resolution', ['most_recently_created_contact']);
     $this->createDuplicateDonors([['first_name' => 'Sally'], []]);

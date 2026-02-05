@@ -45,14 +45,13 @@ class DedupeBaseTestClass extends \PHPUnit\Framework\TestCase implements Headles
           ->setUseTrash(FALSE)
           ->execute();
       }
-      if ($entity === 'CustomGroup') {
-       CustomField::delete(FALSE)->addWhere('custom_group_id', 'IN', $this->ids['CustomGroup'])->execute();
-       CustomGroup::delete(FALSE)->addWhere('id', 'IN', $this->ids['CustomGroup'])->execute();
-
-      }
     }
     foreach ($this->settings as $key => $value) {
       \Civi::settings()->set($key, $value);
+    }
+    if (!empty($this->ids['CustomGroup'])) {
+      CustomField::delete(FALSE)->addWhere('custom_group_id', 'IN', $this->ids['CustomGroup'])->execute();
+      CustomGroup::delete(FALSE)->addWhere('id', 'IN', $this->ids['CustomGroup'])->execute();
     }
     parent::tearDown();
   }
