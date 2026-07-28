@@ -7,17 +7,16 @@ namespace Composer\Autoload;
 class ComposerStaticInit2f630d940212106ac32843f8e2a309b2
 {
     public static $prefixLengthsPsr4 = array (
-        'T' => 
+        'I' =>
         array (
-            'TheIconic\\NameParser\\' => 21,
+            'Iliaal\\NameParser\\' => 18,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'TheIconic\\NameParser\\' => 
+        'Iliaal\\NameParser\\' =>
         array (
-            0 => __DIR__ . '/..' . '/theiconic/name-parser/src',
-            1 => __DIR__ . '/..' . '/theiconic/name-parser/tests',
+            0 => __DIR__ . '/..' . '/iliaal/nameparser/src',
         ),
     );
 
