@@ -3,7 +3,6 @@
 
 namespace Civi\Api4\Action\Name;
 
-use Civi;
 use Civi\Api4\Generic\AbstractAction;
 use Civi\Api4\Generic\Result;
 use Iliaal\NameParser\Parser;
@@ -70,15 +69,16 @@ class Parse extends AbstractAction {
   protected function parseName(string $name): array {
     $parser = new Parser();
     $nameParser = $parser->parse($name);
+    $partner = $nameParser->getPartner();
+    $partnerField = $partner ? ['Partner.Partner' => (string) $partner] : [];
 
-    return [
+    return $partnerField + [
       'prefix_id:label' => $nameParser->getSalutations()[0] ?? '',
       'first_name' => $nameParser->getFirstname(),
       'last_name' => $nameParser->getLastname(),
       'middle_name' => strlen($nameParser->getMiddlename()) ? $nameParser->getMiddlename() : $nameParser->getInitials(),
       'nick_name' => $nameParser->getNickName(),
       'suffix_id:label' => $nameParser->getSuffix(),
-      'Partner.Partner' => (string) $nameParser->getPartner(),
     ];
   }
 
