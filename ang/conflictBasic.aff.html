@@ -19,10 +19,9 @@
       </div>
       <div><strong>{{conflict['display'][options.other_id]}}</strong></div>
 
-      <div ng-if="(key === 'first_name')" class="accordion"
-           id="outer-accordion-{{options.other_id}}-{{options.main_id}}">
-        <div class="card">
-          <div class="card-header" id="display-{{options.other_id}}-{{options.main_id}}">
+      <details ng-if="(key === 'first_name')" class="crm-accordion-light"
+           id="outer-accordion-{{options.other_id}}-{{options.main_id}}" open>
+          <summary id="display-{{options.other_id}}-{{options.main_id}}">
             <span class="mb-0">
               <button class="btn btn-link btn-lg collapsed" type="button" data-toggle="collapse"
                       data-target="#collapseOuter-{{options.other_id}}-{{options.main_id}}"
@@ -31,9 +30,9 @@
                 Save equivalent name pair `{{conflict[options.other_id]}}` and `{{conflict[options.main_id]}}`
               </button>
             </span>
-          </div>
-          <div>
-            <div id="collapseOuter-{{options.other_id}}-{{options.main_id}}" class="collapse"
+          </summary>
+          <div class="crm-accordion-body">
+            <div id="collapseOuter-{{options.other_id}}-{{options.main_id}}"
                  aria-labelledby="display-{{conflict[options.other_id]}}-{{conflict[options.main_id]}}"
                  data-parent="#outer-accordion-{{options.other_id}}-{{options.main_id}}">
 
@@ -70,8 +69,7 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </details>
       </div>
     </div>
   </div>
