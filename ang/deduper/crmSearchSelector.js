@@ -1,4 +1,4 @@
-(function(angular, $, _) {
+(function(angular, $) {
 
   /**
    * Place to cache metadata.
@@ -54,15 +54,15 @@
 
           function get(entity, fieldNames) {
             if (fieldNames.length === 1) {
-              return _.findWhere(schema, {name: fieldNames[0]});
+              return schema.find(function(f) { return f.name === fieldNames[0]; });
             }
-            var comboName = _.findWhere(entityFields(entity), {name: fieldNames[0] + '.' + fieldNames[1]});
+            var comboName = entityFields(entity).find(function(f) { return f.name === fieldNames[0] + '.' + fieldNames[1]; });
             if (comboName) {
               return comboName;
             }
             var linkName = fieldNames.shift(),
-              entityLinks = _.findWhere(links, {entity: entity}).links,
-              newEntity = _.findWhere(entityLinks, {alias: linkName}).entity;
+              entityLinks = links.find(function(l) { return l.entity === entity; }).links,
+              newEntity = entityLinks.find(function(l) { return l.alias === linkName; }).entity;
             return get(newEntity, fieldNames);
           }
         }
@@ -90,17 +90,17 @@
             return;
           }
           if (dataType === 'Timestamp' || dataType === 'Date') {
-            if (_.includes(['=', '!=', '<>', '<', '>=', '<', '<='], op)) {
+            if (['=', '!=', '<>', '<', '>=', '<', '<='].includes(op)) {
               $el.crmDatepicker({time: dataType === 'Timestamp'});
             }
-          } else if (_.includes(['=', '!=', '<>', 'IN', 'NOT IN'], op)) {
-            multi = _.includes(['IN', 'NOT IN'], op);
+          } else if (['=', '!=', '<>', 'IN', 'NOT IN'].includes(op)) {
+            const multi = ['IN', 'NOT IN'].includes(op);
             if (field.fk_entity) {
               $el.crmEntityRef({entity: field.fk_entity});
             } else if (field.options) {
               $el.addClass('loading').attr('placeholder', ts('- select -')).crmSelect2({allowClear: false, data: [{id: '', text: ''}]});
               var options = [];
-              _.each(field.options, function(val, key) {
+              Object.entries(field.options).forEach(function([key, val]) {
                 options.push({id: key, text: val});
                 $el.removeClass('loading').select2({multiple: multi, data: options});
               });
@@ -128,4 +128,4 @@
   });
 
 
-})(angular, CRM.$, CRM._);
+})(angular, CRM.$);

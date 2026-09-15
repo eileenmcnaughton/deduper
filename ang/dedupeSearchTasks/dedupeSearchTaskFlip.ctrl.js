@@ -1,4 +1,4 @@
-(function(angular, $, _) {
+(function(angular, $) {
   "use strict";
 
   angular.module('dedupeSearchTasks').controller('dedupeSearchTaskFlip', function($scope, dialogService) {
@@ -31,4 +31,4 @@
     };
 
   });
-})(angular, CRM.$, CRM._);
+})(angular, CRM.$);
