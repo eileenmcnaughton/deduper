@@ -48,7 +48,7 @@ class CRM_Contact_Form_Task_FindDuplicates extends CRM_Core_Form {
    *
    * @var array
    */
-  public $_contactIds = array();
+  public $_contactIds = [];
 
   /**
    * Build all the data structures needed to build the form.
@@ -71,23 +71,23 @@ class CRM_Contact_Form_Task_FindDuplicates extends CRM_Core_Form {
     ]);
 
     try {
-      $rule_group_id = civicrm_api3('RuleGroup', 'getvalue', array(
+      $rule_group_id = civicrm_api3('RuleGroup', 'getvalue', [
         'contact_type' => $contactType,
         'used' => 'Unsupervised',
         'return' => 'id',
-        'options' => array('limit' => 1),
-      ));
+        'options' => ['limit' => 1],
+      ]);
     }
     catch (CRM_Core_Exception $e) {
-      CRM_Core_Error::statusBounce(ts('It was not possible to identify a default rule that was applicable to all selected contacts. You must choose only one contact type. You chose %1', array($contactType)));
+      CRM_Core_Error::statusBounce(ts('It was not possible to identify a default rule that was applicable to all selected contacts. You must choose only one contact type. You chose %1', [$contactType]));
     }
 
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/dedupefind', array(
+    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/dedupefind', [
       'reset' => 1,
       'action' => 'update',
       'rgid' => $rule_group_id,
-      'criteria' => json_encode(array('contact' => array('id' => array('IN' => $contactIDs)))),
+      'criteria' => json_encode(['contact' => ['id' => ['IN' => $contactIDs]]]),
       'limit' => count($contactIDs),
-    )));
+    ]));
   }
 }
