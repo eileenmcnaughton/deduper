@@ -9,7 +9,7 @@ class CRM_Deduper_Form_Report_MergeConflict extends CRM_Report_Form {
 
   protected $_summary = NULL;
 
-  protected $_customGroupExtends = array('Membership');
+  protected $_customGroupExtends = ['Membership'];
 
   /**
    * @var int
@@ -19,102 +19,102 @@ class CRM_Deduper_Form_Report_MergeConflict extends CRM_Report_Form {
 
     $this->summaryOverlayProfileId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_UFGroup', 'summary_overlay', 'id', 'name');
 
-    $this->_columns = array(
-      'civicrm_merge_conflict' => array(
-        'fields' => array(
-          'contact_1' => array(
+    $this->_columns = [
+      'civicrm_merge_conflict' => [
+        'fields' => [
+          'contact_1' => [
             'title' => E::ts('Contact 1'),
             'default' => TRUE,
             'no_display' => TRUE,
             'required' => TRUE,
-          ),
-          'contact_2' => array(
+          ],
+          'contact_2' => [
             'title' => E::ts('Contact 2'),
             'default' => TRUE,
             'no_display' => TRUE,
             'required' => TRUE,
-          ),
-          'value_1' => array(
+          ],
+          'value_1' => [
             'title' => E::ts('Value 1'),
             'default' => TRUE,
             /*
             'statistics' => array(
               'count'  => ts('Count')
             ),*/
-          ),
-          'value_2' => array(
+          ],
+          'value_2' => [
             'title' => E::ts('Value 2'),
             'default' => TRUE,
             /*
             'statistics' => array(
               'count'  => ts('Count')
             ),*/
-          ),
-          'conflicted_field' => array(
+          ],
+          'conflicted_field' => [
             'title' => E::ts('Conflicted Field'),
             'default' => TRUE,
-          ),
-          'analysis' => array(
+          ],
+          'analysis' => [
             'title' => E::ts('Analysis'),
             'default' => TRUE,
-          ),
-        ),
-        'filters' => array(
-          'value_1' => array(
+          ],
+        ],
+        'filters' => [
+          'value_1' => [
             'title' => E::ts('Value 1'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'value_2' => array(
+          ],
+          'value_2' => [
             'title' => E::ts('Value 2'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'conflicted_field' => array(
+          ],
+          'conflicted_field' => [
             'title' => E::ts('Conflicted Field'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'analysis' => array(
+          ],
+          'analysis' => [
             'title' => E::ts('Analysis'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-        ),
-        'order_bys' => array(
-          'value_1' => array(
+          ],
+        ],
+        'order_bys' => [
+          'value_1' => [
             'title' => E::ts('Value 1'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'value_2' => array(
+          ],
+          'value_2' => [
             'title' => E::ts('Value 2'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'conflicted_field' => array(
+          ],
+          'conflicted_field' => [
             'title' => E::ts('Conflicted Field'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'analysis' => array(
+          ],
+          'analysis' => [
             'title' => E::ts('Analysis'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-        ),
-        'group_bys' => array(
-          'value_1' => array(
+          ],
+        ],
+        'group_bys' => [
+          'value_1' => [
             'title' => E::ts('Value 1'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'value_2' => array(
+          ],
+          'value_2' => [
             'title' => E::ts('Value 2'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'conflicted_field' => array(
+          ],
+          'conflicted_field' => [
             'title' => E::ts('Conflicted Field'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-          'analysis' => array(
+          ],
+          'analysis' => [
             'title' => E::ts('Analysis'),
             'type' => CRM_Utils_Type::T_STRING,
-          ),
-        ),
-      ),
-    );
+          ],
+        ],
+      ],
+    ];
     parent::__construct();
   }
 
@@ -162,7 +162,7 @@ class CRM_Deduper_Form_Report_MergeConflict extends CRM_Report_Form {
           FALSE, NULL
         );
         $rows[$rowNum]['civicrm_merge_conflict_analysis_link'] = $url;
-        $rows[$rowNum]['civicrm_merge_conflict_analysis_hover'] = ts('filter by %1', array( $value, 'String'));
+        $rows[$rowNum]['civicrm_merge_conflict_analysis_hover'] = ts('filter by %1', [ $value, 'String']);
       }
       if (array_key_exists('civicrm_merge_conflict_analysis', $row)) {
         $value = $row['civicrm_merge_conflict_analysis'];
@@ -172,7 +172,7 @@ class CRM_Deduper_Form_Report_MergeConflict extends CRM_Report_Form {
           FALSE, NULL
         );
         $rows[$rowNum]['civicrm_merge_conflict_conflicted_field_link'] = $url;
-        $rows[$rowNum]['civicrm_merge_conflict_analysis_hover'] = ts('filter by %1', array( $value, 'String'));
+        $rows[$rowNum]['civicrm_merge_conflict_analysis_hover'] = ts('filter by %1', [ $value, 'String']);
       }
 
     }

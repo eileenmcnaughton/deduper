@@ -113,15 +113,15 @@ function civicrm_api3_merge_conflict_get($params) {
     WHERE contact_1 = %5
       AND contact_2 = %6
     ",
-     array(
-       1 => array($conflictedField, 'String'),
-       2 => array($value1, 'String'),
-       3 => array($value2, 'String'),
-       4 => array($group, 'Integer'),
-       5 => array($result->contact_1, 'Integer'),
-       6 => array($result->contact_2, 'Integer'),
-       7 => array($analysis, 'String'),
-     )
+     [
+       1 => [$conflictedField, 'String'],
+       2 => [$value1, 'String'],
+       3 => [$value2, 'String'],
+       4 => [$group, 'Integer'],
+       5 => [$result->contact_1, 'Integer'],
+       6 => [$result->contact_2, 'Integer'],
+       7 => [$analysis, 'String'],
+     ]
     );
   }
   return civicrm_api3_create_success(1);
@@ -140,26 +140,26 @@ function mergeconflict_get_analysis($value1, $value2, $comparisonValue1, $compar
     return 'email_weirdness';
   }
 
-  $comparisonValue1 = str_replace(array("&amp;"), '&', $comparisonValue1);
-  $comparisonValue2 = str_replace(array("&amp;"), '&', $comparisonValue2);
+  $comparisonValue1 = str_replace(["&amp;"], '&', $comparisonValue1);
+  $comparisonValue2 = str_replace(["&amp;"], '&', $comparisonValue2);
   if ($comparisonValue1 === $comparisonValue2) {
     return 'wierd_amp_yankovitch';
   }
 
-  $comparisonValue1 = str_replace(array(' ', "\n", "\r", "\R", "\t"), '', $comparisonValue1);
-  $comparisonValue2 = str_replace(array(' ', "\n", "\r", "\R", "\t"), '', $comparisonValue2);
+  $comparisonValue1 = str_replace([' ', "\n", "\r", "\R", "\t"], '', $comparisonValue1);
+  $comparisonValue2 = str_replace([' ', "\n", "\r", "\R", "\t"], '', $comparisonValue2);
   if ($comparisonValue1 === $comparisonValue2) {
     return 'whitespace';
   }
 
-  $comparisonValue1 = str_replace(array("&amp;"), '&', $comparisonValue1);
-  $comparisonValue2 = str_replace(array("&amp;"), '&', $comparisonValue2);
+  $comparisonValue1 = str_replace(["&amp;"], '&', $comparisonValue1);
+  $comparisonValue2 = str_replace(["&amp;"], '&', $comparisonValue2);
   if ($comparisonValue1 === $comparisonValue2) {
     return 'wierd_amp_yankovitch';
   }
 
-  $comparisonValue1 = str_replace(array('.', '-', "'", '&', '#'), '', $comparisonValue1);
-  $comparisonValue2 = str_replace(array('.', '-', "'", '&', '#'), '', $comparisonValue2);
+  $comparisonValue1 = str_replace(['.', '-', "'", '&', '#'], '', $comparisonValue1);
+  $comparisonValue2 = str_replace(['.', '-', "'", '&', '#'], '', $comparisonValue2);
   if ($comparisonValue1 === $comparisonValue2) {
     return 'punctuation';
   }
@@ -198,12 +198,12 @@ function mergeconflict_get_analysis($value1, $value2, $comparisonValue1, $compar
         return 'mishandled_postcode';
       }
     }
-    $addressPieces = array(
+    $addressPieces = [
       'road' => 'rd',
       'street' => 'st',
       'drive' => 'dr',
       'place' => 'pl',
-    );
+    ];
     if (str_replace(array_keys($addressPieces), $addressPieces, $comparisonValue1) === str_replace(array_keys($addressPieces), $addressPieces, $comparisonValue2)) {
       return 'address_abbreviations';
     }
@@ -251,7 +251,7 @@ function mergeconflict_get_analysis($value1, $value2, $comparisonValue1, $compar
 
 
 function _mergeconflict_is_variant($value1, $value2) {
-  $map = array(
+  $map = [
     'suzanne' => 'susan',
     'dafydd' => 'david',
     'pavel' => 'paul',
@@ -270,7 +270,7 @@ function _mergeconflict_is_variant($value1, $value2) {
     'dave' => 'david',
     'jim' => 'james',
     'alex' => 'alexander',
-  );
+  ];
   $reverse = array_flip($map);
   if ((isset($map[$value1]) && $map[$value1] === $value2)
   || (isset($reverse[$value1]) && $reverse[$value1] === $value2)
@@ -282,8 +282,8 @@ function _mergeconflict_is_variant($value1, $value2) {
 
 function _mergeconflict_uses_title($value1, $value2, $comparisonValue1, $comparisonValue2) {
   $initialsRegex = '/[A-Z][\s|.]?[A-Z]?$/';
-  $matches = array();
-  foreach (array(array($value1, $value2), array($value2, $value1)) as $values) {
+  $matches = [];
+  foreach ([[$value1, $value2], [$value2, $value1]] as $values) {
     if (preg_match($initialsRegex, $values[0], $matches)) {
       $parts = explode('-', $matches[0]);
       $initials = explode(' ', $parts[0]);

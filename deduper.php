@@ -99,22 +99,22 @@ function deduper_civicrm_summaryActions(&$actions, $contactID) {
     ]);
     $weight = 500;
 
-    $contactIDS = array($contactID);
+    $contactIDS = [$contactID];
     foreach ($ruleGroups['values'] as $ruleGroup) {
-      $actions['otherActions']['dupe' . $ruleGroup['id']] = array(
-        'title' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
-        'name' => ts('Find matches using Rule : %1', array(1 => $ruleGroup['title'])),
+      $actions['otherActions']['dupe' . $ruleGroup['id']] = [
+        'title' => ts('Find matches using Rule : %1', [1 => $ruleGroup['title']]),
+        'name' => ts('Find matches using Rule : %1', [1 => $ruleGroup['title']]),
         'weight' => $weight,
         'ref' => 'dupe-rule crm-contact_activities-list',
         'key' => 'dupe' . $ruleGroup['id'],
-        'href' => CRM_Utils_System::url('civicrm/contact/dedupefind', array(
+        'href' => CRM_Utils_System::url('civicrm/contact/dedupefind', [
           'reset' => 1,
           'action' => 'update',
           'rgid' => $ruleGroup['id'],
-          'criteria' => json_encode(array('contact' => array('id' => array('IN' => $contactIDS)))),
+          'criteria' => json_encode(['contact' => ['id' => ['IN' => $contactIDS]]]),
           'limit' => count($contactIDS),
-        )),
-      );
+        ]),
+      ];
       $weight++;
     }
   }
@@ -285,12 +285,12 @@ function deduper_civicrm_merge($type, &$refs, $mainId, $otherId, $tables) {
       }
       $refs['migration_info']['context'] = $type;
       // Randomise log connection id. This ensures reverts can be done without reverting the whole batch if logging is enabled.
-      CRM_Core_DAO::executeQuery('SET @uniqueID = %1', array(
-        1 => array(
+      CRM_Core_DAO::executeQuery('SET @uniqueID = %1', [
+        1 => [
           uniqid() . CRM_Utils_String::createRandom(4, CRM_Utils_String::ALPHANUMERIC),
           'String',
-        ),
-      ));
+        ],
+      ]);
 
       if ($type === 'batch') {
         $merger = new CRM_Deduper_BAO_MergeHandler($refs, (int) $mainId, (int) $otherId, $type, ($refs['mode'] === 'safe'));
