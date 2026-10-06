@@ -315,7 +315,7 @@ class CleanTest extends DedupeBaseTestClass {
         Email::create()->setCheckPermissions(FALSE)->setValues($values)->execute();
         return;
 
-      case 'Phone' ;
+      case 'Phone' :
         Phone::create()->setCheckPermissions(FALSE)->setValues($values)->execute();
         return;
 
@@ -351,7 +351,7 @@ class CleanTest extends DedupeBaseTestClass {
       case 'Email':
         return Email::get()->setCheckPermissions(FALSE)->addOrderBy('is_primary', 'DESC')->addWhere('contact_id', '=', $ponyoID)->addSelect('*')->execute();
 
-      case 'Phone';
+      case 'Phone':
         return Phone::get()->setCheckPermissions(FALSE)->addOrderBy('is_primary', 'DESC')->addWhere('contact_id', '=', $ponyoID)->addSelect('*')->execute();
 
       case 'Address':
@@ -370,7 +370,7 @@ class CleanTest extends DedupeBaseTestClass {
         Email::clean()->setCheckPermissions(FALSE)->setContactIDs([$ponyoID])->execute();
         return;
 
-      case 'Phone';
+      case 'Phone':
         Phone::clean()->setCheckPermissions(FALSE)->setContactIDs([$ponyoID])->execute();
         return;
 
