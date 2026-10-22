@@ -11,4 +11,5 @@ return [
     'ang/dedupeSearchTasks',
   ],
   'requires' => ['api4'],
+  'basePages' => [],
 ];
