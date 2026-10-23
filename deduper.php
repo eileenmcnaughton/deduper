@@ -58,10 +58,12 @@ function deduper_civicrm_angularModules(&$angularModules) {
     'ext' => 'deduper',
     'js' => ['bower_components/angular-xeditable/dist/js/xeditable.js'],
     'css' => ['bower_components/angular-xeditable/dist/css/xeditable.css'],
+    'basePages' => [],
   ];
   $angularModules['angularUtils.directives.dirPagination'] = [
     'ext' => 'deduper',
     'js' => ['bower_components/angularUtils-pagination/dirPagination.js'],
+    'basePages' => [],:
   ];
 }
 
